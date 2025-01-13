@@ -16,7 +16,7 @@ import './models/associations';
 
 const app = express();
 
-const server = createServer(app);
+// const server = createServer(app);
 
 dotenv.config()
 
