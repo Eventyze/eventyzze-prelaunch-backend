@@ -40,7 +40,6 @@
     "nodemon": "^3.1.9",
     "otp-generator": "^4.0.1",
     "pg": "^8.13.1",
-    "pg-hstore": "^2.3.4",
     "redis": "^4.7.0",
     "sequelize": "^6.37.5",
     "supertest": "^7.0.0",
