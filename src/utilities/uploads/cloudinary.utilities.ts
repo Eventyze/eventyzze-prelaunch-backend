@@ -5,7 +5,6 @@ import dotenv from 'dotenv';
 import { Request, Response } from 'express';
 import { CLOUDINARY_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } from '../../configurations/envKeys';
 import { errorUtilities } from '../';
-// import { logger } from '../logger/logger.utilities';
 
 dotenv.config()
 
