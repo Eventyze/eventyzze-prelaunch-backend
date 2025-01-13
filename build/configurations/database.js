@@ -9,10 +9,10 @@ const config_1 = __importDefault(require("./config"));
 const { NEON } = config_1.default;
 exports.database = new sequelize_1.Sequelize(`${NEON}`, {
     pool: {
-        max: 5, // Maximum number of connections
-        min: 0, // Minimum number of connections
-        acquire: 30000, // Maximum time (ms) to try to get a connection
-        idle: 10000, // Time (ms) a connection can be idle before being released
+        max: 5,
+        min: 0,
+        acquire: 30000,
+        idle: 10000,
     },
 });
 // let sequelize: Sequelize;

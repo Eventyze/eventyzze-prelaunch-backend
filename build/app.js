@@ -12,12 +12,11 @@ const morgan_1 = __importDefault(require("morgan"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const routes_1 = __importDefault(require("./routes"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const http_1 = require("http");
 const utilities_1 = require("./utilities");
 const database_1 = require("./configurations/database");
 require("./models/associations");
 const app = (0, express_1.default)();
-const server = (0, http_1.createServer)(app);
+// const server = createServer(app);
 dotenv_1.default.config();
 // Set security HTTP headers to disable 'powered by Express' header feature
 app.disable("x-powered-by");
