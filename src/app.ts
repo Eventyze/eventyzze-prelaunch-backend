@@ -42,14 +42,14 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Database
-database
-  .sync({})
-  .then(() => {
-    console.log("Database is connected");
-  })
-  .catch((err: HttpError) => {
-    console.log("No connection:", err);
-  });
+// database
+//   .sync({})
+//   .then(() => {
+//     console.log("Database is connected");
+//   })
+//   .catch((err: HttpError) => {
+//     console.log("No connection:", err);
+//   });
 
 
 // Routes

@@ -13,7 +13,6 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const routes_1 = __importDefault(require("./routes"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const utilities_1 = require("./utilities");
-const database_1 = require("./configurations/database");
 require("./models/associations");
 const app = (0, express_1.default)();
 // const server = createServer(app);
@@ -34,14 +33,14 @@ app.use((0, morgan_1.default)("dev"));
 app.use(express_1.default.json());
 app.use((0, cookie_parser_1.default)());
 // Database
-database_1.database
-    .sync({})
-    .then(() => {
-    console.log("Database is connected");
-})
-    .catch((err) => {
-    console.log("No connection:", err);
-});
+// database
+//   .sync({})
+//   .then(() => {
+//     console.log("Database is connected");
+//   })
+//   .catch((err: HttpError) => {
+//     console.log("No connection:", err);
+//   });
 // Routes
 app.use("/api/v1", routes_1.default);
 // Health Check Endpoint
