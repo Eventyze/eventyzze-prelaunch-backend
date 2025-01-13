@@ -21,7 +21,7 @@ const storage = new CloudinaryStorage({
         try {
             if (!file) throw new Error("File is required");
             return {
-                folder: "Eventyze"
+                folder: "Eventyzze"
             }
         } catch (error: any) {
             logger.error(`Cloudinary storage error: ${error.message}`);

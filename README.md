@@ -1,1 +1,1 @@
-# eventyze-backend
+# Eventyzze-backend

@@ -131,8 +131,8 @@ const userRegisterWithEmailService = errorUtilities.withErrorHandling(
 
     await mailUtilities.sendMail(
       email,
-      `Welcome to Eventyze, your OTP is ${otp}, it expires in 5 minutes`,
-      "Eventyze OTP"
+      `Welcome to Eventyzze, your OTP is ${otp}, it expires in 5 minutes`,
+      "Eventyzze OTP"
     );
 
     responseHandler.statusCode = 201;
@@ -226,7 +226,7 @@ const userVerifiesOtp = errorUtilities.withErrorHandling(
 
     await mailUtilities.sendMail(
       mainUser.email,
-      `Welcome to Eventyze, your email has been verified successfully. You can now login and start hosting your events 😊`,
+      `Welcome to Eventyzze, your email has been verified successfully. You can now login and start hosting your events 😊`,
       "Email Verified"
     );
 
@@ -330,17 +330,17 @@ const userLogin = errorUtilities.withErrorHandling(
     const dateDetails = generalHelpers.dateFormatter(new Date());
 
     if (!existingUser.refreshToken || !existingUser.isInitialProfileSetupDone) {
-      mailMessage = `Welcome to Eventyze ${
+      mailMessage = `Welcome to Eventyzze ${
         existingUser.name ? existingUser.name : ""
       }! <br /><br />
 
-          We're excited to have you on board. Eventyze is your go-to platform for discovering, organizing, and sharing amazing events. Whether you're attending or hosting, we're here to make your experience seamless and enjoyable. <br /> <br />
+          We're excited to have you on board. Eventyzze is your go-to platform for discovering, organizing, and sharing amazing events. Whether you're attending or hosting, we're here to make your experience seamless and enjoyable. <br /> <br />
 
           If you have any questions or need help getting started, feel free to reach out to our support team. We're always here to assist you. <br /> <br />
 
           Let's make some unforgettable moments together!`;
 
-      mailSubject = `Welcome to Eventyze ${
+      mailSubject = `Welcome to Eventyzze ${
         existingUser.name ? existingUser.name : ""
       }`;
     } else {
@@ -413,8 +413,8 @@ const userResendsOtpService = errorUtilities.withErrorHandling(
     if (new Date(otpDetails.expiresAt) > new Date()) {
       await mailUtilities.sendMail(
         email,
-        `Welcome to Eventyze, your OTP is ${otpDetails.otp}, it expires soon`,
-        "Eventyze OTP"
+        `Welcome to Eventyzze, your OTP is ${otpDetails.otp}, it expires soon`,
+        "Eventyzze OTP"
       );
 
       responseHandler.statusCode = 200;
@@ -464,8 +464,8 @@ const userResendsOtpService = errorUtilities.withErrorHandling(
 
     await mailUtilities.sendMail(
       email,
-      `Welcome to Eventyze, your OTP is ${otp}, it expires in 5 minutes`,
-      "Eventyze OTP"
+      `Welcome to Eventyzze, your OTP is ${otp}, it expires in 5 minutes`,
+      "Eventyzze OTP"
     );
 
     responseHandler.statusCode = 200;

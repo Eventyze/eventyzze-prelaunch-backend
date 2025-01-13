@@ -69,8 +69,8 @@ app.use(errorUtilities.globalErrorHandler);
 /**
  * Server
  */
-server.listen(config.PORT, () => {
-  console.log(`server running on Port ${config.PORT}`);
-});
+// server.listen(config.PORT, () => {
+//   console.log(`server running on Port ${config.PORT}`);
+// });
 
 export default app;
