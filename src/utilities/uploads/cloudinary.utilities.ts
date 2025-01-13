@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import { Request, Response } from 'express';
 import { CLOUDINARY_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } from '../../configurations/envKeys';
 import { errorUtilities } from '../';
-import { logger } from '../logger/logger.utilities';
+// import { logger } from '../logger/logger.utilities';
 
 dotenv.config()
 
@@ -24,7 +24,7 @@ const storage = new CloudinaryStorage({
                 folder: "Eventyzze"
             }
         } catch (error: any) {
-            logger.error(`Cloudinary storage error: ${error.message}`);
+            console.error(`Cloudinary storage error: ${error.message}`);
             throw error;
         }
     }
@@ -43,12 +43,12 @@ const cloud = multer({
             ){
                 cb(null, true);
             } else {
-                logger.error(`Invalid file type: ${file.mimetype}`);
+                console.error(`Invalid file type: ${file.mimetype}`);
                 cb(null, false);
                 return cb(new Error("Only .png, .jpg, .jpeg, .webp, .avif formats are allowed"));
             }
         } catch (error: any) {
-            logger.error(`File filter error: ${error.message}`);
+            console.error(`File filter error: ${error.message}`);
             cb(error);
         }
     },
@@ -62,14 +62,14 @@ const upload = (req: Request, res: Response, next: Function) => {
     cloud(req, res, (error: any) => {
         if (error instanceof multer.MulterError) {
             // A Multer error occurred when uploading
-            logger.error(`Multer error: ${error.message}`);
+            console.error(`Multer error: ${error.message}`);
             return res.status(400).json({
                 status: 'error',
                 message: error.message
             });
         } else if (error) {
             // An unknown error occurred when uploading
-            logger.error(`Upload error: ${error.message}`);
+            console.error(`Upload error: ${error.message}`);
             return res.status(500).json({
                 status: 'error',
                 message: error.message
