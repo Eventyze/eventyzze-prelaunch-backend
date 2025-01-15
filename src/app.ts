@@ -16,7 +16,7 @@ import './models/associations';
 
 const app = express();
 
-// const server = createServer(app);
+const server = createServer(app);
 
 dotenv.config()
 
@@ -42,14 +42,14 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Database
-// database
-//   .sync({})
-//   .then(() => {
-//     console.log("Database is connected");
-//   })
-//   .catch((err: HttpError) => {
-//     console.log("No connection:", err);
-//   });
+database
+  .sync({})
+  .then(() => {
+    console.log("Database is connected");
+  })
+  .catch((err: HttpError) => {
+    console.log("No connection:", err);
+  });
 
 
 // Routes
@@ -69,8 +69,8 @@ app.use(errorUtilities.globalErrorHandler);
 /**
  * Server
  */
-// server.listen(config.PORT, () => {
-//   console.log(`server running on Port ${config.PORT}`);
-// });
+server.listen(config.PORT, () => {
+  console.log(`server running on Port ${config.PORT}`);
+});
 
 export default app;
