@@ -14,6 +14,7 @@ import {
   folowersRepositories,
   otpRepositories,
 } from "../../repositories";
+import { EmailAuthResponses } from '../../types/responseTypes/responses';
 
 const userRegisterWithEmailService = errorUtilities.withErrorHandling(
   async (userPayload: Record<string, any>): Promise<Record<string, any>> => {
@@ -30,14 +31,14 @@ const userRegisterWithEmailService = errorUtilities.withErrorHandling(
     email = email.trim();
 
     if (!validator.isEmail(email)) {
-      throw errorUtilities.createError("Invalid email", 400);
+      throw errorUtilities.createError(EmailAuthResponses.INVALID_EMAIL, 400);
     }
 
     const existingUser: any = await userRepositories.userRepositories.getOne({ email });
 
     if (existingUser) {
       throw errorUtilities.createError(
-        "User already exists with this email",
+        EmailAuthResponses.ALREADY_EXISTING_USER,
         400
       );
     }
@@ -137,7 +138,7 @@ const userRegisterWithEmailService = errorUtilities.withErrorHandling(
 
     responseHandler.statusCode = 201;
     responseHandler.message =
-      "User created successfully, an OTP has been sent to your mail for email verification";
+    EmailAuthResponses.SUCCESFUL_CREATION;
     responseHandler.data = user;
     return responseHandler;
   }
@@ -163,7 +164,7 @@ const userVerifiesOtp = errorUtilities.withErrorHandling(
     );
 
     if (!user) {
-      throw errorUtilities.createError("User not found", 404);
+      throw errorUtilities.createError(EmailAuthResponses.NOT_FOUND, 404);
     }
 
     const otpFinder: any = await otpRepositories.otpRpositories.getOne({
@@ -173,7 +174,7 @@ const userVerifiesOtp = errorUtilities.withErrorHandling(
 
     if (!otpFinder || otpFinder.used) {
       throw errorUtilities.createError(
-        "Invalid OTP. Please try again or request a new OTP",
+        EmailAuthResponses.INVALID_OTP,
         400
       );
     }
@@ -182,7 +183,7 @@ const userVerifiesOtp = errorUtilities.withErrorHandling(
 
     if (!verify) {
       throw errorUtilities.createError(
-        "OTP expired. Please request a new OTP",
+        EmailAuthResponses.EXPIRED_OTP,
         400
       );
     }
@@ -231,7 +232,7 @@ const userVerifiesOtp = errorUtilities.withErrorHandling(
     );
 
     responseHandler.statusCode = 200;
-    responseHandler.message = "Account verified successfully";
+    responseHandler.message = EmailAuthResponses.VERIFIED_ACCOUNT;
     responseHandler.data = { user: mainUser, accessToken, refreshToken };
     return responseHandler;
   }
@@ -284,21 +285,21 @@ const userLogin = errorUtilities.withErrorHandling(
 
     if (!existingUser) {
       throw errorUtilities.createError(
-        `User with email ${email} does not exist`,
+        EmailAuthResponses.NOT_FOUND,
         404
       );
     }
 
     if (!existingUser.isVerified) {
       responseHandler.statusCode = 403;
-      responseHandler.message = `${email} is not verified. Please request a new OTP to verify your account`;
+      responseHandler.message = EmailAuthResponses.UNVERIFIED_ACCOUNT;
       responseHandler.data = {user:existingUser};
       return responseHandler;
     }
 
     if (existingUser.isBlacklisted) {
       throw errorUtilities.createError(
-        `Account Blocked, contact admin on eventyzze@gmail.com`,
+        EmailAuthResponses.BLOCKED_ACCOUNT,
         400
       );
     }
@@ -309,7 +310,7 @@ const userLogin = errorUtilities.withErrorHandling(
     );
 
     if (!verifyPassword) {
-      throw errorUtilities.createError("Incorrect Password", 400);
+      throw errorUtilities.createError(EmailAuthResponses.INCORRECT_PASSWORD, 400);
     }
 
     const tokenPayload = {
@@ -367,7 +368,7 @@ const userLogin = errorUtilities.withErrorHandling(
     responseHandler.statusCode = 200;
 
     responseHandler.message =
-      "Welcome back" + `${existingUser.fullName ? existingUser.fullName : ""}`;
+      EmailAuthResponses.WELCOME_BACK + `${existingUser.userName ? existingUser.userName : ""}`;
 
     responseHandler.data = {
       user: userWithoutPassword,
@@ -398,13 +399,13 @@ const userResendsOtpService = errorUtilities.withErrorHandling(
 
     if (!user) {
       responseHandler.statusCode = 404;
-      responseHandler.message = "User not found, please register";
+      responseHandler.message = EmailAuthResponses.NOT_FOUND;
       return responseHandler;
     }
 
     if (user.isVerified) {
       responseHandler.statusCode = 400;
-      responseHandler.message = "Account already verified, please login";
+      responseHandler.message = EmailAuthResponses.ALREADY_VERIFIED;
       return responseHandler;
     }
 
@@ -419,7 +420,7 @@ const userResendsOtpService = errorUtilities.withErrorHandling(
 
       responseHandler.statusCode = 200;
       responseHandler.message =
-        "OTP has been resent successfully, please check your mail";
+        EmailAuthResponses.OTP_RESENT;
       return responseHandler;
     }
 
@@ -470,7 +471,7 @@ const userResendsOtpService = errorUtilities.withErrorHandling(
 
     responseHandler.statusCode = 200;
     responseHandler.message =
-      "OTP has been resent successfully, please check your mail";
+      EmailAuthResponses.OTP_RESENT;
     return responseHandler;
   }
 );
