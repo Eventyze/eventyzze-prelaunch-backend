@@ -146,7 +146,37 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
     return responseHandler;
 
   })
+
+
+
+const hostgetsAllTheirEventsService = errorUtilities.withErrorHandling(
+  async (userId: string): Promise<Record<string, any>> => {
+    const responseHandler: ResponseDetails = {
+      statusCode: 0,
+      message: "",
+      data: {},
+      details: {},
+      info: {},
+    }; 
+
+    const user = await userRepositories.userRepositories.getOne({id:userId})
+
+    if(!user){
+        responseHandler.message = 'User not found';
+        responseHandler.statusCode = 404;
+        return responseHandler;
+    }
+
+    const userEvents = await eventRepositories.eventRepositories.getOne({userId})
+
+    responseHandler.message = 'Events fetched successfully';
+    responseHandler.statusCode = 200;
+    responseHandler.data = {events: userEvents};
+    return responseHandler;
+
+  })
 export default {
     getAllHostsService,
     hostCreatesEventService,
+    hostgetsAllTheirEventsService
 }
