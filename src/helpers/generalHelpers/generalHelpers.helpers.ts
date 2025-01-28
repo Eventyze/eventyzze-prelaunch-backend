@@ -2,6 +2,9 @@ import brcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import otpGenerator from 'otp-generator';
 import { APP_SECRET } from '../../configurations/envKeys';
+import { userRepositories } from 'repositories';
+import { UserAttributes } from 'types/modelTypes';
+import { v1 as uuidv1 } from 'uuid';
 // import { ResponseDetails } from '../../types/utilities.types';
 // import { errorUtilities } from '../../utilities';
 // import { QueryParameters } from '../../types/helpers.types';
@@ -156,6 +159,53 @@ const generateTransactionReference = (eventName:string): string => {
 };
 
 
+const generateUniqueUserEventyzzeId = async (
+  countryCode: string | any,
+  stateCode: string,
+  maxRetries: number = 5
+): Promise<string> => {
+  let attempt = 0;
+  
+  while (attempt < maxRetries) {
+    try {
+      const eventyzzeId = `EVNTZ-${countryCode}-${stateCode}-${uuidv1().substring(0, 6).toUpperCase()}`;
+
+      const existingUser = await userRepositories.userRepositories.getOne(
+        { eventyzzeId },
+        ['eventyzzeId']
+      );
+      
+      if (!existingUser) {
+        return eventyzzeId;
+      }
+      
+      attempt++;
+    } catch (error) {
+      attempt++;
+    }
+  }
+  
+  throw new Error('Failed to generate unique EventyzzeId after maximum retries');
+};
+
+//FOR THE FUTURE
+// const generateUniqueUserEventyzzeId = async (
+//   countryCode: string,
+//   stateCode: string
+// ): Promise<string> => {
+//   // Get current timestamp in milliseconds
+//   const timestamp = Date.now().toString(36);
+  
+//   // Get UUID v1 which includes timestamp + node identifier
+//   const uniqueSegment = uuidv1().substring(0, 6);
+  
+//   // Combine with a random number for extra uniqueness
+//   const randomNum = Math.floor(Math.random() * 1000).toString(36);
+  
+//   return `EVNTZ-${countryCode}-${stateCode}-${timestamp}${uniqueSegment}${randomNum}`;
+// };
+
+
   //This function is used to manage queries (request.query) for the application  
   // export const queryFilter = async (queryItem: QueryParameters) => {
 
@@ -222,5 +272,6 @@ export default {
   // refreshUserToken,
   dateFormatter,
   // verifyRegistrationToken
-  generateTransactionReference
+  generateTransactionReference,
+  generateUniqueUserEventyzzeId
 };

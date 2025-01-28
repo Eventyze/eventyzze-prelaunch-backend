@@ -4,6 +4,9 @@ import validator from "validator";
 import { JwtPayload } from "jsonwebtoken";
 import { userRepositories } from "../../repositories";
 import { UserAttributes } from "types/modelTypes";
+import countries from 'i18n-iso-countries';
+import { generalHelpers } from "helpers";
+const iso3166 = require('iso3166-2-db');
 
 const userProfileUpdateService = errorUtilities.withErrorHandling(
   async (profilePayload: Record<string, any>): Promise<Record<string, any>> => {
@@ -150,15 +153,18 @@ const userfirstimeProfileUpdateService = errorUtilities.withErrorHandling(
       info: {},
     };
 
-    
-    const {
+    countries.registerLocale(require('i18n-iso-countries/langs/en.json'))
+
+    let {
       id,
       userName,
       bio,
       interests,
       phone,
       fullName,
-      address
+      state,
+      country,
+      address,
     } = profilePayload
     
     const user = await userRepositories.userRepositories.getOne({id}) as unknown as UserAttributes;
@@ -182,6 +188,20 @@ const userfirstimeProfileUpdateService = errorUtilities.withErrorHandling(
       if (!validator.isMobilePhone(phone, "any")) {
         throw errorUtilities.createError("Invalid phone number", 400);
       }
+
+      const countryCode = countries.getAlpha2Code(country, 'en');
+
+      const stateCode = iso3166.subdivision(countryCode, state)?.code || state.substring(0, 2).toUpperCase();
+
+      let userEventyzzeId;
+
+      try {
+        userEventyzzeId = await generalHelpers.generateUniqueUserEventyzzeId(countryCode, stateCode);
+      } catch (error) {
+        throw errorUtilities.createError("Failed to generate unique identifier, please try again", 500);
+      }
+
+      profilePayload.eventyzzeId = userEventyzzeId;
 
     const newUser = await userRepositories.userRepositories.updateOne(
       { id },

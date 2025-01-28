@@ -22,6 +22,25 @@ const updateUserProfile = async (
   );
 };
 
+const firstTimeProfileUpdate = async (
+  request: JwtPayload,
+  response: Response
+): Promise<any> => {
+
+    const { id } = request.user
+
+  const newUpdate: any = await userServices.userfirstimeProfileUpdateService(
+    { ...request.body, id }
+  );
+
+  return responseUtilities.responseHandler(
+    response,
+    newUpdate.message,
+    newUpdate.statusCode,
+    newUpdate.data
+  );
+};
+
 const changeUserImage = async (
   request: JwtPayload,
   response: Response
@@ -40,5 +59,6 @@ const changeUserImage = async (
 
 export default {
     updateUserProfile,
-    changeUserImage
+    changeUserImage,
+    firstTimeProfileUpdate
 }

@@ -63,6 +63,34 @@ const resetPasswordSchema = Joi.object({
 });
 
 
+const firstTimeProfileUpdateSchema = Joi.object({
+  userName: Joi.string().trim().required().messages({
+    'string.base': 'userName is required'
+  }),
+  bio: Joi.string().trim().required().messages({
+    'string.base': 'bio is required'
+  }),
+  interests: Joi.string().trim().required().messages({
+    'string.base': 'interests are required'
+  }),
+  phone: Joi.string().trim().required().messages({
+    'string.base': 'phone is required'
+  }),
+  fullName: Joi.string().trim().required().messages({
+    'string.base': "fullName is required"
+  }),
+  state: Joi.string().trim().required().messages({
+    'string.base': 'state is required'
+  }),
+  country: Joi.string().trim().required().messages({
+    'string.base': 'country is required'
+  }),
+  address: Joi.string().trim().required().messages({
+    'string.base': 'address is required'
+  }),
+});
+
+
 //Event flow
 const createEventSchema = Joi.object({
   eventTitle: Joi.string().trim().required().messages({
@@ -100,4 +128,5 @@ export default {
   requestPasswordResetSchema,
   resetPasswordSchema,
   createEventSchema,
+  firstTimeProfileUpdateSchema
 }

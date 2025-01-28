@@ -12,6 +12,7 @@ router.post('/verify-otp', joiValidators.inputValidator(joiValidators.verifyOtpS
 router.post('/email-login', joiValidators.inputValidator(joiValidators.loginUserSchemaViaEmail), userAuthController.userLoginWithEmail)
 router.get('/resend-otp', userAuthController.userResendsOtp)
 router.put('/profile-update', generalAuthFunction, userController.updateUserProfile)
+router.put('/first-time-profile-update', joiValidators.inputValidator(joiValidators.firstTimeProfileUpdateSchema), generalAuthFunction, userController.firstTimeProfileUpdate)
 router.put('/image-upload', generalAuthFunction, cloudinaryUpload, userController.changeUserImage)
 router.post('/google-auth', joiValidators.inputValidator(joiValidators.googleAuthSchema), userAuthController.googleAuth)
 router.post('/facebook-auth', joiValidators.inputValidator(joiValidators.facebookAuthSchema), userAuthController.facebookAuth)
