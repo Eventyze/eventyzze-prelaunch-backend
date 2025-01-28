@@ -2,7 +2,7 @@ import { ResponseDetails } from "../../types/generalTypes";
 import validator from "validator";
 import { generalHelpers } from "../../helpers";
 import { mailUtilities, errorUtilities } from "../../utilities";
-import { Roles } from "../../types/modelTypes";
+import { Roles, UserAttributes } from "../../types/modelTypes";
 import { v4 } from "uuid";
 import otpDatabaseHelpers from "../../repositories/otpRepository/otpRepository.repositories";
 import { Transaction } from "sequelize";
@@ -34,7 +34,7 @@ const userRegisterWithEmailService = errorUtilities.withErrorHandling(
       throw errorUtilities.createError(EmailAuthResponses.INVALID_EMAIL, 400);
     }
 
-    const existingUser: any = await userRepositories.userRepositories.getOne({ email });
+    const existingUser = await userRepositories.userRepositories.getOne({ email }) as unknown as UserAttributes;
 
     if (existingUser) {
       throw errorUtilities.createError(

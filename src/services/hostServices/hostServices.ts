@@ -1,11 +1,14 @@
 import { ResponseDetails } from "../../types/generalTypes";
-import { errorUtilities, mailUtilities } from "../../utilities";
+import { errorUtilities, mailUtilities, recieptUtilities } from "../../utilities";
 import validator from "validator";
 import { JwtPayload } from "jsonwebtoken";
-import { Roles, SubscriptionPlans, UserAttributes } from "../../types/modelTypes";
-import { eventRepositories, userRepositories, walletRepositories } from "../../repositories";
+import { EventAttributes, Roles, SubscriptionPlans, UserAttributes, WalletAttributes } from "../../types/modelTypes";
+import { eventRepositories, transactionRepositories, userRepositories, walletRepositories } from "../../repositories";
 import { v4 } from "uuid";
 import { Transaction } from "sequelize";
+import { generalHelpers } from "../../helpers";
+import performTransaction from "../../middlewares/databaseTransactions.middleware";
+
 
 const getAllHostsService = errorUtilities.withErrorHandling(
   async (): Promise<Record<string, any>> => {
@@ -100,13 +103,13 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
     const eventPayload = {
       id: eventId,
       userId: user.id,
+      eventTitle: eventCreationDetails.eventTitle,
       description: eventCreationDetails.description,
       eventAd: eventCreationDetails.eventAd,
-      date: eventCreationDetails.startDate,
-      startTime: eventCreationDetails.eventTime,
+      date: eventCreationDetails.date,
+      startTime: eventCreationDetails.startTime,
       duration: eventCreationDetails.duration,
       endTime: eventCreationDetails.endTime,
-      hostJoinTime: eventCreationDetails.hostJoinTime,
       cost: eventCreationDetails.cost,
       coverImage: eventCreationDetails.coverImage,
       noOfLikes: 0,
@@ -146,8 +149,6 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
     return responseHandler;
 
   })
-
-
 
 const hostgetsAllTheirEventsService = errorUtilities.withErrorHandling(
   async (userId: string): Promise<Record<string, any>> => {
@@ -203,10 +204,144 @@ const hostgetsAllTheirEventsService = errorUtilities.withErrorHandling(
 
     })
 
+const hostDeletesEvent = errorUtilities.withErrorHandling(
+  async (userId: string, eventId:string): Promise<Record<string, any>> => {
+    const responseHandler: ResponseDetails = {
+      statusCode: 0,
+      message: "",
+      data: {},
+      details: {},
+      info: {},
+    };
 
+    const user = await userRepositories.userRepositories.getOne({id:userId})
+
+    if(!user){
+      responseHandler.message = "User not found";
+      responseHandler.statusCode = 404;
+      return responseHandler;
+    }
+
+    const event = await eventRepositories.eventRepositories.getOne({id:eventId}) as unknown as EventAttributes
+
+    if (!event) {
+      responseHandler.message = "Event not found";
+      responseHandler.statusCode = 404;
+      return responseHandler;
+    }
+
+    if(event.userId !== userId){
+      responseHandler.message = "You cannot delete an event you did not create";
+      responseHandler.statusCode = 400;
+      return responseHandler;
+    }
+
+    if(event.isHosting){
+      responseHandler.message = "You cannot delete an event that is still ongoing. End the event first please";
+      responseHandler.statusCode = 400;
+      return responseHandler;
+    }
+
+    if (event.attendees.length && !event.isHosted) {
+
+      const eventCost = event.cost;
+
+      const eventWallet = await walletRepositories.walletRepositories.getOne({ownerId:event.id}) as unknown as WalletAttributes
+
+      for (const attendeeId of event.attendees) {
+
+        const attendee = await userRepositories.userRepositories.getOne({id:attendeeId}) as unknown as UserAttributes;
+
+        const attendeeWallet = await walletRepositories.walletRepositories.getOne({
+          ownerId: attendeeId,
+        }) as unknown as WalletAttributes;
+
+        if (!attendeeWallet) {
+          console.warn(`Wallet not found for attendee: ${attendeeId}`);
+          continue;
+        }
+        
+        const transactionReference = generalHelpers.generateTransactionReference(event.eventTitle)
+
+        const operations = [
+
+          async(transaction:Transaction) => {
+        await walletRepositories.walletRepositories.updateOne(
+          { id: attendeeWallet.id },
+          { ledgerBalance: attendeeWallet.ledgerBalance + eventCost },
+          transaction
+        );
+      },
+
+        async(transaction:Transaction) => {
+        await transactionRepositories.transactionRepositories.create({
+          id: v4(),
+          userUUId: attendeeId,
+          amount: eventCost,
+          type: "credit",
+          status: "completed",
+          date: new Date(),
+          reference: transactionReference,
+          userEventyzzeId: attendee.eventyzzeId,
+          description: `Refund from ${event.eventTitle} cancellation`
+        },
+        transaction
+      );
+        },
+
+        async(transaction:Transaction) => {
+        await walletRepositories.walletRepositories.updateOne(
+          { id: eventWallet.id },
+          { ledgerBalance: eventWallet.ledgerBalance - eventCost },
+          transaction
+        );
+        },
+
+      ]
+
+      await performTransaction.performTransaction(operations);
+
+      const transactionReciept = recieptUtilities({
+        reference: transactionReference,
+        amount: eventCost,
+        type: "credit",
+        status: "completed",
+        date: new Date(),
+        userEventyzzeId: "",
+        description: `Refund from ${event.eventTitle} cancellation`
+      })
+
+        try{
+          await mailUtilities.sendMail(
+            attendee.email,
+            transactionReciept,
+            "Transaction",
+          )
+        }catch(error:any){
+          console.log('delete event error:', error.message)
+        }
+      }
+
+      const deletedEvent = await eventRepositories.eventRepositories.deleteOne({ id: eventId });
+
+      responseHandler.message = "Event deleted and refunds processed successfully";
+      responseHandler.statusCode = 200;
+      return responseHandler;
+
+    }
+
+    await eventRepositories.eventRepositories.deleteOne({ id: eventId });
+
+    responseHandler.message = "Event deleted successfully";
+    responseHandler.statusCode = 200;
+    return responseHandler;
+
+
+})
 export default {
     getAllHostsService,
     hostCreatesEventService,
     hostgetsAllTheirEventsService,
-    hostGetsSingleEventService
+    hostGetsSingleEventService,
+    hostDeletesEvent
 }

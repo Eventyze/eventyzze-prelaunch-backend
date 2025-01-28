@@ -13,6 +13,11 @@ Events.init(
           allowNull: false,
       },
 
+      eventTitle: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+
       userId: {
           type: DataTypes.UUID,
           allowNull: false,
@@ -89,8 +94,20 @@ Events.init(
         allowNull: true,
       },
 
+      isHosting: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+      },
+
+      isHosted: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+      },
+
       cost: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
 

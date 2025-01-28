@@ -146,6 +146,16 @@ const dateFormatter = (dateString: Date) => {
   };
 
 
+  /**
+ * Generates a unique transaction reference.
+ * @returns {string} A unique transaction reference.
+ */
+const generateTransactionReference = (eventName:string): string => {
+  const eventInitials = eventName.split(" ").map((word) => word[0].match(/[a-z,A-Z]/) ? word[0]?.toUpperCase() : word[0]).join("");
+  return `EVENTYZZE-TXN-${eventInitials}-${Date.now()}`;
+};
+
+
   //This function is used to manage queries (request.query) for the application  
   // export const queryFilter = async (queryItem: QueryParameters) => {
 
@@ -212,4 +222,5 @@ export default {
   // refreshUserToken,
   dateFormatter,
   // verifyRegistrationToken
+  generateTransactionReference
 };

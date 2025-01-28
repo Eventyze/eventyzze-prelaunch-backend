@@ -3,9 +3,9 @@ import { database } from "../../configurations/database";
 import User from "../users/usersModel";
 import { TransactionAttributes } from "../../types/modelTypes";
 
-export class Transaction extends Model<TransactionAttributes> {}
+export class Transactions extends Model<TransactionAttributes> {}
 
-Transaction.init(
+Transactions.init(
   {
       id: {
           type: DataTypes.UUID,
@@ -13,7 +13,18 @@ Transaction.init(
           allowNull: false,
       },
 
-      userId: {
+      date: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: new Date()
+      },
+
+     description: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+     },
+
+      userUUId: {
           type: DataTypes.UUID,
           allowNull: false,
           references: {
@@ -22,6 +33,11 @@ Transaction.init(
           },
           onDelete: "CASCADE",
           onUpdate: "CASCADE",
+      },
+
+      userEventyzzeId: {
+          type: DataTypes.STRING,
+          allowNull: false,
       },
 
       amount: {
@@ -39,10 +55,14 @@ Transaction.init(
           allowNull: false,
           defaultValue: "pending",
       },
-      reference: ""
+
+      reference: {
+          type: DataTypes.STRING,
+          allowNull: false,
+      },
   },
   {
     sequelize: database,
-    tableName: "User",
+    tableName: "Transactions",
   }
 )

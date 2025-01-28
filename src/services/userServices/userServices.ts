@@ -28,7 +28,7 @@ const userProfileUpdateService = errorUtilities.withErrorHandling(
         body.interests.length === 0) &&
       (!body.phone || body.phone === "") &&
       (!body.fullName || body.fullName === "") &&
-      (!body.country || profilePayload.country === "")
+      (!body.address || body.address === "")
     ) {
       throw errorUtilities.createError(
         "At least one field must be selected for update",
@@ -61,7 +61,7 @@ const userProfileUpdateService = errorUtilities.withErrorHandling(
     }
 
     if (body.bio) {
-      updateDetails.bio = body.bio;
+      updateDetails.bio = body.bio.trim();
     }
 
     if (body.interests) {
@@ -72,19 +72,27 @@ const userProfileUpdateService = errorUtilities.withErrorHandling(
       if (!validator.isMobilePhone(body.phone, "any")) {
         throw errorUtilities.createError("Invalid phone number", 400);
       }
-      updateDetails.phone = body.phone;
+      updateDetails.phone = body.phone.trim();
     }
 
     if (body.fullName) {
-      updateDetails.fullName = body.fullName;
+      updateDetails.fullName = body.fullName.trim();
     }
 
     if (body.country) {
-      updateDetails.country = body.country;
+      updateDetails.country = body.country.trim();
+    }
+
+    if (body.state) {
+      updateDetails.country = body.country.trim();
     }
 
     if (!user.isInitialProfileSetupDone) {
       updateDetails.isInitialProfileSetupDone = true;
+    }
+
+    if(body.address){
+      updateDetails.address = body.address.trim()
     }
 
     const newUser = await userRepositories.userRepositories.updateOne(
@@ -134,6 +142,8 @@ const updateUserImageService = errorUtilities.withErrorHandling(
     return responseHandler;
   }
 );
+
+
 
 const userSwitchesToHostService = errorUtilities.withErrorHandling(
   async (userPayload: Record<string, any>): Promise<Record<string, any>> => {

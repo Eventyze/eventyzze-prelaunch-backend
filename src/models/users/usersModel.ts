@@ -32,6 +32,12 @@ User.init(
       },
     },
 
+    eventyzzeId: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true
+    },
+
     email: {
       type: DataTypes.TEXT,
       allowNull: false,
@@ -95,6 +101,16 @@ User.init(
     },
 
     country: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    state: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    address: {
       type: DataTypes.STRING,
       allowNull: true,
     },

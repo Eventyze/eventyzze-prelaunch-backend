@@ -4,6 +4,7 @@ import folowersRepositories from "./followersRepository/folowersRepository.repos
 import userRepositories from "./userRepository/userRepository.repositories";
 import walletRepositories from "./walletRepository/walletRepository.repositories";
 import eventRepositories from "./eventRepository/eventRepository.repositories";
+import transactionRepositories from './transactionRepository/transactionRepository.repositories';
 
 
 export {
@@ -12,5 +13,6 @@ export {
     folowersRepositories,
     userRepositories,
     walletRepositories,
-    eventRepositories
+    eventRepositories,
+    transactionRepositories
 }

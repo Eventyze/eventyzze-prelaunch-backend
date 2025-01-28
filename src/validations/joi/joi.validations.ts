@@ -65,6 +65,9 @@ const resetPasswordSchema = Joi.object({
 
 //Event flow
 const createEventSchema = Joi.object({
+  eventTitle: Joi.string().trim().required().messages({
+    'string.base': 'Event title is required'
+  }),
   description: Joi.string().trim().required().messages({
     'string.base': 'Event description is required'
   }),

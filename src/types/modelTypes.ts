@@ -13,6 +13,7 @@ export interface UserAttributes {
     phone: string;
     fullName: string;
     userName: string;
+    eventyzzeId: string;
     email: string;
     isInitialHostingOfferExhausted: boolean;
     password:string;
@@ -23,6 +24,8 @@ export interface UserAttributes {
     bio: string;
     userImage: string;
     country: string;
+    state: string;
+    address: string;
     subscriptionPlan: string;
     accountStatus: string;
     interests: any;
@@ -111,13 +114,14 @@ export interface SubscriptionPlanAttributes {
 
 export interface EventAttributes {
     id: string;
+    eventTitle: string;
     userId: string;
     attendees: string[];
     description: string;
     date: Date;
     startTime: Date;
     duration: string;
-    cost: string;
+    cost: number;
     eventAd: string;
     coverImage: string;
     hostJoinTime: string;
@@ -126,6 +130,8 @@ export interface EventAttributes {
     noOfDislikes: number;
     likers: string[]
     dislikers: string[]
+    isHosting: boolean;
+    isHosted: boolean;
 }
 
 
@@ -152,11 +158,14 @@ export interface SubscriptionTransactionAttributes {
 
 export interface TransactionAttributes {
     id: string;
-    userId: string;
+    // userId: string;
     amount: number;
     type: "credit" | "debit";
     status: "pending" | "completed" | "failed";
     reference: string;
-    description?: string;
+    description: string;
+    userUUId: string;
+    userEventyzzeId: string;
+    date: Date;
   }
   
