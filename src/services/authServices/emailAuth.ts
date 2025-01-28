@@ -80,6 +80,7 @@ const userRegisterWithEmailService = errorUtilities.withErrorHandling(
       id: userId,
       email,
       password: await generalHelpers.hashPassword(password.trim()),
+      eventyzzeId: "",
       otp: {
         otp,
         otpId,

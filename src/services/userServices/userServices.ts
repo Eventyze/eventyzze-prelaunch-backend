@@ -3,6 +3,7 @@ import { errorUtilities } from "../../utilities";
 import validator from "validator";
 import { JwtPayload } from "jsonwebtoken";
 import { userRepositories } from "../../repositories";
+import { UserAttributes } from "types/modelTypes";
 
 const userProfileUpdateService = errorUtilities.withErrorHandling(
   async (profilePayload: Record<string, any>): Promise<Record<string, any>> => {
@@ -87,10 +88,6 @@ const userProfileUpdateService = errorUtilities.withErrorHandling(
       updateDetails.country = body.country.trim();
     }
 
-    if (!user.isInitialProfileSetupDone) {
-      updateDetails.isInitialProfileSetupDone = true;
-    }
-
     if(body.address){
       updateDetails.address = body.address.trim()
     }
@@ -143,7 +140,62 @@ const updateUserImageService = errorUtilities.withErrorHandling(
   }
 );
 
+const userfirstimeProfileUpdateService = errorUtilities.withErrorHandling(
+  async (profilePayload: Record<string, any>): Promise<Record<string, any>> => {
+    const responseHandler: ResponseDetails = {
+      statusCode: 0,
+      message: "",
+      data: {},
+      details: {},
+      info: {},
+    };
 
+    
+    const {
+      id,
+      userName,
+      bio,
+      interests,
+      phone,
+      fullName,
+      address
+    } = profilePayload
+    
+    const user = await userRepositories.userRepositories.getOne({id}) as unknown as UserAttributes;
+    
+    if (!user) {
+      throw errorUtilities.createError("User not found", 404);
+    }
+
+      const confirmUserName = await userRepositories.userRepositories.getOne(
+        { userName },
+        ["userName"]
+      );
+
+      if (confirmUserName) {
+        throw errorUtilities.createError(
+          "Username unavailable, please choose another username",
+          400
+        );
+      }
+
+      if (!validator.isMobilePhone(phone, "any")) {
+        throw errorUtilities.createError("Invalid phone number", 400);
+      }
+
+    const newUser = await userRepositories.userRepositories.updateOne(
+      { id },
+      profilePayload
+    );
+
+    responseHandler.statusCode = 200;
+    responseHandler.message = "Profile updated successfully";
+    responseHandler.data = {
+      user: newUser,
+    };
+    return responseHandler;
+  }
+);
 
 const userSwitchesToHostService = errorUtilities.withErrorHandling(
   async (userPayload: Record<string, any>): Promise<Record<string, any>> => {
@@ -164,4 +216,5 @@ export default {
   userProfileUpdateService,
   updateUserImageService,
   userSwitchesToHostService,
+  userfirstimeProfileUpdateService
 };
