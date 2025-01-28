@@ -14,7 +14,7 @@ export interface UserAttributes {
     fullName: string;
     userName: string;
     email: string;
-    isInitialProfileSetupDone: boolean;
+    isInitialHostingOfferExhausted: boolean;
     password:string;
     role: string;
     refreshToken: string;
@@ -38,6 +38,7 @@ export interface UserAttributes {
 export enum Roles {
     User = "User",
     Host = "Host",
+    Event = "Event",
     SuperAdmin = "SuperAdmin",
     FinanceAdmin = "FinanceAdmin",
     PeopleAdmin = "PeopleAdmin",
@@ -75,9 +76,10 @@ export interface OtpAttributes {
 
 export interface WalletAttributes {
     id: string
-    userId: string;
+    ownerId: string;
     totalBalance: number;
     ledgerBalance: number;
+    walletType: string;
   }
 
 //=============== FOLLOWERS && FOLLOWINGS =============//
@@ -114,10 +116,16 @@ export interface EventAttributes {
     description: string;
     date: Date;
     startTime: Date;
-    Duration: string;
+    duration: string;
     cost: string;
     eventAd: string;
     coverImage: string;
+    hostJoinTime: string;
+    endTime: string;
+    noOfLikes: number;
+    noOfDislikes: number;
+    likers: string[]
+    dislikers: string[]
 }
 
 

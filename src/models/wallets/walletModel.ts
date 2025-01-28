@@ -1,6 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import { database } from "../../configurations/database";
 import {
+  Roles,
   WalletAttributes,
 } from "../../types/modelTypes";
 import User from "../users/usersModel";
@@ -15,7 +16,7 @@ Wallet.init(
       allowNull: false,
     },
 
-    userId: {
+    ownerId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -24,6 +25,14 @@ Wallet.init(
       },
       onDelete: "CASCADE",
       onUpdate: "CASCADE",
+    },
+
+    walletType: {
+      type: DataTypes.ENUM(...Object.values(Roles)),
+      allowNull: false,
+      validate: {
+        isIn: [Object.values(Roles)],
+      },
     },
 
     totalBalance: {

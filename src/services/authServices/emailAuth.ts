@@ -59,7 +59,8 @@ const userRegisterWithEmailService = errorUtilities.withErrorHandling(
 
     const walletPayload = {
       id: v4(),
-      userId,
+      ownerId: userId,
+      walletType: Roles.User,
       totalBalance: 0,
     };
 

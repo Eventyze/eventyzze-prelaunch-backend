@@ -41,7 +41,7 @@ User.init(
       },
     },
 
-    isInitialProfileSetupDone: {
+    isInitialHostingOfferExhausted: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },

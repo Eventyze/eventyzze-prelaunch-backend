@@ -50,8 +50,42 @@ Events.init(
         allowNull: false,
       },
 
-      Duration: {
+      noOfLikes: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+      },
+
+      noOfDislikes: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+      },
+
+      likers: {
+        type: DataTypes.ARRAY(DataTypes.UUID),
+        allowNull: true,
+        defaultValue: [],
+      },
+
+      dislikers: {
+        type: DataTypes.ARRAY(DataTypes.UUID),
+        allowNull: true,
+        defaultValue: [],
+      },
+
+      duration: {
         type: DataTypes.STRING,
+        allowNull: true,
+      },
+
+      endTime: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+
+      hostJoinTime: {
+        type: DataTypes.DATE,
         allowNull: true,
       },
 
