@@ -62,6 +62,31 @@ const resetPasswordSchema = Joi.object({
   }),
 });
 
+
+//Event flow
+const createEventSchema = Joi.object({
+  description: Joi.string().trim().required().messages({
+    'string.base': 'Event description is required'
+  }),
+  startDate: Joi.string().trim().required().messages({
+    'string.base': 'Event start date is required'
+  }),
+  eventTime: Joi.string().trim().required().messages({
+    'string.base': 'Event start time is required'
+  }),
+  duration: Joi.string().trim().required(),
+  endTime: Joi.string().trim().required().messages({
+    'string.base': 'Event end time is required'
+  }),
+  cost: Joi.string().trim().required().messages({
+    'string.base': 'Event ticket cost is required'
+  }),
+  coverImage: Joi.string().trim().required().messages({
+    'string.base': 'Event cover image/banner is required'
+  }),
+});
+
+
 export default {
   userRegisterSchemaViaEmail,
   loginUserSchemaViaEmail,
@@ -71,4 +96,5 @@ export default {
   facebookAuthSchema,
   requestPasswordResetSchema,
   resetPasswordSchema,
+  createEventSchema,
 }

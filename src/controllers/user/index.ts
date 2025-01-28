@@ -18,7 +18,6 @@ const updateUserProfile = async (
     response,
     newUser.message,
     newUser.statusCode,
-    newUser.details,
     newUser.data
   );
 };
@@ -34,8 +33,7 @@ const changeUserImage = async (
     response,
     newUserImage.message,
     newUserImage.statusCode,
-    newUserImage.data,
-    newUserImage.details
+    newUserImage.data
   );
 };
 

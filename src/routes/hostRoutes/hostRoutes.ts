@@ -10,5 +10,6 @@ const router = express.Router();
 
 //Shop Routes
 router.get('/get-all-hosts', hostController.allHosts)
+router.post('/create-event', joiValidators.inputValidator(joiValidators.createEventSchema), generalAuthFunction, hostController.hostCreatesEvent)
 
 export default router;

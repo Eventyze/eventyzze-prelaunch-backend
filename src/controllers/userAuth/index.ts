@@ -41,7 +41,6 @@ const userVerifiesOtp = async (
     response,
     newUser.message,
     newUser.statusCode,
-    newUser.details,
     newUser.data
   );
 };
@@ -77,7 +76,6 @@ const userResendsOtp = async (
     response,
     resentOtp.message,
     resentOtp.statusCode,
-    resentOtp.details,
     resentOtp.data,
   );
 };
@@ -138,7 +136,6 @@ const requestPasswordReset = async (
     response,
     resetResponse.message,
     resetResponse.statusCode,
-    resetResponse.details,
     resetResponse.data
   );
 };
@@ -153,7 +150,6 @@ const resetPassword = async (
     response,
     resetResponse.message,
     resetResponse.statusCode,
-    resetResponse.details,
     resetResponse.data
   );
 };

@@ -136,7 +136,7 @@ export function rolePermit(roles: string[]) {
     if (!isAuthorized) {
       return response.status(401).json({
         status: 'error',
-        message: 'User Not Permitted For Action',
+        message: 'Not Permitted For Action',
       });
     }
 
