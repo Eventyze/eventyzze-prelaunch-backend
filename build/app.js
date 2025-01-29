@@ -37,7 +37,7 @@ app.use(express_1.default.json());
 app.use((0, cookie_parser_1.default)());
 // Database
 database_1.database
-    .sync({})
+    .sync({ force: true })
     .then(() => {
     console.log("Database is connected");
 })

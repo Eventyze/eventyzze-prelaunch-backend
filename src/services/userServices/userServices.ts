@@ -203,6 +203,8 @@ const userfirstimeProfileUpdateService = errorUtilities.withErrorHandling(
 
       profilePayload.eventyzzeId = userEventyzzeId;
 
+      profilePayload.isInitialProfileSetupDone = true
+
     const newUser = await userRepositories.userRepositories.updateOne(
       { id },
       profilePayload

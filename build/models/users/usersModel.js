@@ -38,6 +38,10 @@ User.init({
             msg: "Email already in use",
         },
     },
+    activeDeviceId: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: true,
+    },
     isInitialHostingOfferExhausted: {
         type: sequelize_1.DataTypes.BOOLEAN,
         defaultValue: false,
@@ -100,6 +104,10 @@ User.init({
         defaultValue: false,
     },
     isBlacklisted: {
+        type: sequelize_1.DataTypes.BOOLEAN,
+        defaultValue: false,
+    },
+    isInitialProfileSetupDone: {
         type: sequelize_1.DataTypes.BOOLEAN,
         defaultValue: false,
     },

@@ -31,10 +31,12 @@ export interface UserAttributes {
     interests: any;
     isVerified: boolean;
     isBlacklisted: boolean;
+    isInitialProfileSetupDone: boolean;
     noOfFollowers: number;
     noOfFollowings: number;
     otp: Record<string, any>;
     subScriptionId: string;
+    activeDeviceId: string;
     subscriptionDetails: subscriptionDetails;
 }
 

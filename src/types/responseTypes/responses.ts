@@ -14,4 +14,5 @@ export enum EmailAuthResponses {
     ALREADY_VERIFIED = "Account already verified, please login",
     OTP_RESENT = "OTP has been resent successfully, please check your mail",
     BLOCKED_ACCOUNT = "Account Blocked, contact admin on eventyzze@gmail.com",
+    ALREADY_LOGGED_IN = "Already logged in on another device"
 }

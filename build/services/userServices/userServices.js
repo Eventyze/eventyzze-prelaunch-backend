@@ -127,6 +127,7 @@ const userfirstimeProfileUpdateService = utilities_1.errorUtilities.withErrorHan
         throw utilities_1.errorUtilities.createError("Failed to generate unique identifier, please try again", 500);
     }
     profilePayload.eventyzzeId = userEventyzzeId;
+    profilePayload.isInitialProfileSetupDone = true;
     const newUser = await repositories_1.userRepositories.userRepositories.updateOne({ id }, profilePayload);
     responseHandler.statusCode = 200;
     responseHandler.message = "Profile updated successfully";

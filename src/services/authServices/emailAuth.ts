@@ -14,7 +14,7 @@ import {
   folowersRepositories,
   otpRepositories,
 } from "../../repositories";
-import { EmailAuthResponses } from '../../types/responseTypes/responses';
+import { EmailAuthResponses } from "../../types/responseTypes/responses";
 
 const userRegisterWithEmailService = errorUtilities.withErrorHandling(
   async (userPayload: Record<string, any>): Promise<Record<string, any>> => {
@@ -34,7 +34,9 @@ const userRegisterWithEmailService = errorUtilities.withErrorHandling(
       throw errorUtilities.createError(EmailAuthResponses.INVALID_EMAIL, 400);
     }
 
-    const existingUser = await userRepositories.userRepositories.getOne({ email }) as unknown as UserAttributes;
+    const existingUser = (await userRepositories.userRepositories.getOne({
+      email,
+    })) as unknown as UserAttributes;
 
     if (existingUser) {
       throw errorUtilities.createError(
@@ -119,10 +121,7 @@ const userRegisterWithEmailService = errorUtilities.withErrorHandling(
       },
 
       async (transaction: Transaction) => {
-        await otpRepositories.otpRpositories.create(
-          otpPayload,
-          transaction
-        );
+        await otpRepositories.otpRpositories.create(otpPayload, transaction);
       },
     ];
 
@@ -139,8 +138,7 @@ const userRegisterWithEmailService = errorUtilities.withErrorHandling(
     );
 
     responseHandler.statusCode = 201;
-    responseHandler.message =
-    EmailAuthResponses.SUCCESFUL_CREATION;
+    responseHandler.message = EmailAuthResponses.SUCCESFUL_CREATION;
     responseHandler.data = user;
     return responseHandler;
   }
@@ -161,8 +159,8 @@ const userVerifiesOtp = errorUtilities.withErrorHandling(
     const projection = ["otp", "id", "role", "email"];
 
     const user: any = await userRepositories.userRepositories.getOne(
-      { email:email.trim() },
-      projection,
+      { email: email.trim() },
+      projection
     );
 
     if (!user) {
@@ -175,19 +173,13 @@ const userVerifiesOtp = errorUtilities.withErrorHandling(
     });
 
     if (!otpFinder || otpFinder.used) {
-      throw errorUtilities.createError(
-        EmailAuthResponses.INVALID_OTP,
-        400
-      );
+      throw errorUtilities.createError(EmailAuthResponses.INVALID_OTP, 400);
     }
 
     const verify = await generalHelpers.verifyOtp(otpFinder);
 
     if (!verify) {
-      throw errorUtilities.createError(
-        EmailAuthResponses.EXPIRED_OTP,
-        400
-      );
+      throw errorUtilities.createError(EmailAuthResponses.EXPIRED_OTP, 400);
     }
 
     const tokenPayload = {
@@ -222,10 +214,9 @@ const userVerifiesOtp = errorUtilities.withErrorHandling(
 
     await performTransaction.performTransaction(operations);
 
-    const mainUser: any =
-      await userRepositories.userRepositories.getOne({
-        email,
-      });
+    const mainUser: any = await userRepositories.userRepositories.getOne({
+      email,
+    });
 
     await mailUtilities.sendMail(
       mainUser.email,
@@ -250,7 +241,7 @@ const userLogin = errorUtilities.withErrorHandling(
       info: {},
     };
 
-    const { email, password } = loginPayload;
+    const { email, password, deviceId } = loginPayload;
 
     const projection = [
       "password",
@@ -274,36 +265,29 @@ const userLogin = errorUtilities.withErrorHandling(
       "userName",
       "accountStatus",
       "subScriptionId",
-      "subscriptionDetails"
+      "subscriptionDetails",
     ];
 
     const filter = { email: email.trim() };
 
-    const existingUser: any =
-      await userRepositories.userRepositories.getOne(
-        filter,
-        projection
-      );
+    const existingUser: any = await userRepositories.userRepositories.getOne(
+      filter,
+      projection
+    );
 
     if (!existingUser) {
-      throw errorUtilities.createError(
-        EmailAuthResponses.NOT_FOUND,
-        404
-      );
+      throw errorUtilities.createError(EmailAuthResponses.NOT_FOUND, 404);
     }
 
     if (!existingUser.isVerified) {
       responseHandler.statusCode = 403;
       responseHandler.message = EmailAuthResponses.UNVERIFIED_ACCOUNT;
-      responseHandler.data = {user:existingUser};
+      responseHandler.data = { user: existingUser };
       return responseHandler;
     }
 
     if (existingUser.isBlacklisted) {
-      throw errorUtilities.createError(
-        EmailAuthResponses.BLOCKED_ACCOUNT,
-        400
-      );
+      throw errorUtilities.createError(EmailAuthResponses.BLOCKED_ACCOUNT, 400);
     }
 
     const verifyPassword = await generalHelpers.validatePassword(
@@ -312,7 +296,17 @@ const userLogin = errorUtilities.withErrorHandling(
     );
 
     if (!verifyPassword) {
-      throw errorUtilities.createError(EmailAuthResponses.INCORRECT_PASSWORD, 400);
+      throw errorUtilities.createError(
+        EmailAuthResponses.INCORRECT_PASSWORD,
+        400
+      );
+    }
+
+    if (existingUser.activeDeviceId && existingUser.activeDeviceId !== deviceId) {
+      throw errorUtilities.createError(
+        EmailAuthResponses.ALREADY_LOGGED_IN,
+        404
+      );
     }
 
     const tokenPayload = {
@@ -356,12 +350,12 @@ const userLogin = errorUtilities.withErrorHandling(
 
     existingUser.refreshToken = refreshToken;
 
+    existingUser.activeDeviceId = deviceId;
+
     await existingUser.save();
 
     const userWithoutPassword =
-      await userRepositories.userRepositories.extractUserDetails(
-        existingUser
-      );
+      await userRepositories.userRepositories.extractUserDetails(existingUser);
 
     delete userWithoutPassword.refreshToken;
 
@@ -370,7 +364,8 @@ const userLogin = errorUtilities.withErrorHandling(
     responseHandler.statusCode = 200;
 
     responseHandler.message =
-      EmailAuthResponses.WELCOME_BACK + `${existingUser.userName ? existingUser.userName : ""}`;
+      EmailAuthResponses.WELCOME_BACK +
+      `${existingUser.userName ? existingUser.userName : ""}`;
 
     responseHandler.data = {
       user: userWithoutPassword,
@@ -421,8 +416,7 @@ const userResendsOtpService = errorUtilities.withErrorHandling(
       );
 
       responseHandler.statusCode = 200;
-      responseHandler.message =
-        EmailAuthResponses.OTP_RESENT;
+      responseHandler.message = EmailAuthResponses.OTP_RESENT;
       return responseHandler;
     }
 
@@ -448,10 +442,7 @@ const userResendsOtpService = errorUtilities.withErrorHandling(
 
     const operations = [
       async (transaction: Transaction) => {
-        await otpRepositories.otpRpositories.create(
-          otpPayload,
-          transaction
-        );
+        await otpRepositories.otpRpositories.create(otpPayload, transaction);
       },
 
       async (transaction: Transaction) => {
@@ -472,11 +463,22 @@ const userResendsOtpService = errorUtilities.withErrorHandling(
     );
 
     responseHandler.statusCode = 200;
-    responseHandler.message =
-      EmailAuthResponses.OTP_RESENT;
+    responseHandler.message = EmailAuthResponses.OTP_RESENT;
     return responseHandler;
   }
 );
+
+const userLogout = errorUtilities.withErrorHandling(
+  async (resendPayload: Record<string, any>) => {
+    const responseHandler: ResponseDetails = {
+      statusCode: 0,
+      message: "",
+      data: {},
+      details: {},
+      info: {},
+    };
+
+  })
 
 // const adminRegistrationService = errorUtilities.withErrorHandling(async (userPayload: Record<string, any>) => {
 

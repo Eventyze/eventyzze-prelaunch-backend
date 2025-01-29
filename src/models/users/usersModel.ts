@@ -47,6 +47,11 @@ User.init(
       },
     },
 
+    activeDeviceId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
     isInitialHostingOfferExhausted: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
@@ -121,6 +126,11 @@ User.init(
     },
 
     isBlacklisted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+
+    isInitialProfileSetupDone: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
