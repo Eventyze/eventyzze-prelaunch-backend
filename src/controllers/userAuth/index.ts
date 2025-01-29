@@ -154,6 +154,21 @@ const resetPassword = async (
   );
 };
 
+const userLogout = async (
+  request: Request,
+  response: Response
+): Promise<any> => {
+
+  const loggedOutUser: any = await userEmailAuthService.userLogoutService(request.body);
+  
+  return responseUtilities.responseHandler(
+    response,
+    loggedOutUser.message,
+    loggedOutUser.statusCode,
+    loggedOutUser.data,
+  );
+};
+
 export default {
   userRegisterWithEmail,
   userVerifiesOtp,
@@ -163,4 +178,5 @@ export default {
   facebookAuth,
   requestPasswordReset,
   resetPassword,
+  userLogout
 };

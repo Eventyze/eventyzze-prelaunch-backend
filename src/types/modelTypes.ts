@@ -36,7 +36,7 @@ export interface UserAttributes {
     noOfFollowings: number;
     otp: Record<string, any>;
     subScriptionId: string;
-    activeDeviceId: string;
+    activeDeviceId: any;
     subscriptionDetails: subscriptionDetails;
 }
 

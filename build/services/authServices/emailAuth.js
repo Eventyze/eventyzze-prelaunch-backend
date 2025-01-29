@@ -298,7 +298,7 @@ const userResendsOtpService = utilities_1.errorUtilities.withErrorHandling(async
     responseHandler.message = responses_1.EmailAuthResponses.OTP_RESENT;
     return responseHandler;
 });
-const userLogout = utilities_1.errorUtilities.withErrorHandling(async (resendPayload) => {
+const userLogoutService = utilities_1.errorUtilities.withErrorHandling(async (logoutPayload) => {
     const responseHandler = {
         statusCode: 0,
         message: "",
@@ -306,6 +306,15 @@ const userLogout = utilities_1.errorUtilities.withErrorHandling(async (resendPay
         details: {},
         info: {},
     };
+    const { email } = logoutPayload;
+    const user = await repositories_1.userRepositories.userRepositories.getOne({ email });
+    if (user) {
+        user.activeDeviceId = null;
+        await repositories_1.userRepositories.userRepositories.updateOne({ email }, { activeDeviceId: null });
+    }
+    responseHandler.message = responses_1.EmailAuthResponses.LOGOUT_MESSAGE;
+    responseHandler.statusCode = 200;
+    return responseHandler;
 });
 // const adminRegistrationService = errorUtilities.withErrorHandling(async (userPayload: Record<string, any>) => {
 //     const responseHandler: ResponseDetails = {
@@ -395,6 +404,7 @@ exports.default = {
     userVerifiesOtp,
     userLogin,
     userResendsOtpService,
+    userLogoutService,
     // adminRegistrationService,
     // userLogin,
     // verifyUserAccount,

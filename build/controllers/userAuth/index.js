@@ -57,6 +57,10 @@ const resetPassword = async (request, response) => {
     const resetResponse = await services_4.passwordResetService.resetPassword(request.body);
     return utilities_1.responseUtilities.responseHandler(response, resetResponse.message, resetResponse.statusCode, resetResponse.data);
 };
+const userLogout = async (request, response) => {
+    const loggedOutUser = await services_1.userEmailAuthService.userLogoutService(request.body);
+    return utilities_1.responseUtilities.responseHandler(response, loggedOutUser.message, loggedOutUser.statusCode, loggedOutUser.data);
+};
 exports.default = {
     userRegisterWithEmail,
     userVerifiesOtp,
@@ -66,4 +70,5 @@ exports.default = {
     facebookAuth,
     requestPasswordReset,
     resetPassword,
+    userLogout
 };

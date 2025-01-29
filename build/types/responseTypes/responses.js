@@ -17,4 +17,5 @@ var EmailAuthResponses;
     EmailAuthResponses["OTP_RESENT"] = "OTP has been resent successfully, please check your mail";
     EmailAuthResponses["BLOCKED_ACCOUNT"] = "Account Blocked, contact admin on eventyzze@gmail.com";
     EmailAuthResponses["ALREADY_LOGGED_IN"] = "Already logged in on another device";
+    EmailAuthResponses["LOGOUT_MESSAGE"] = "Sad to see you go, but we believe you will be back soon";
 })(EmailAuthResponses || (exports.EmailAuthResponses = EmailAuthResponses = {}));
