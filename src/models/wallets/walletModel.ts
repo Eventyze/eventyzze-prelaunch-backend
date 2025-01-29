@@ -5,6 +5,7 @@ import {
   WalletAttributes,
 } from "../../types/modelTypes";
 import User from "../users/usersModel";
+import Events from "../events/eventsModel";
 
 export class Wallet extends Model<WalletAttributes> {}
 
@@ -19,12 +20,6 @@ Wallet.init(
     ownerId: {
       type: DataTypes.UUID,
       allowNull: false,
-      references: {
-        model: User,
-        key: "id",
-      },
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
     },
 
     walletType: {

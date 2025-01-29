@@ -3,9 +3,9 @@ import { errorUtilities } from "../../utilities";
 import validator from "validator";
 import { JwtPayload } from "jsonwebtoken";
 import { userRepositories } from "../../repositories";
-import { UserAttributes } from "types/modelTypes";
+import { UserAttributes } from "../../types/modelTypes";
 import countries from 'i18n-iso-countries';
-import { generalHelpers } from "helpers";
+import { generalHelpers } from "../../helpers";
 const iso3166 = require('iso3166-2-db');
 
 const userProfileUpdateService = errorUtilities.withErrorHandling(

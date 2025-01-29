@@ -9,7 +9,8 @@
     "test": "cross-env NODE_ENV=development --max-old-space-size=4096 jest -i --colors --verbose --detectOpenHandles --coverage --forceExit --testTimeout=500000 __tests__",
     "test:watch": "cross-env NODE_ENV=development jest --watch",
     "dev": "cross-env NODE_ENV=development nodemon",
-    "prod": "cross-env NODE_ENV=production node build/app.js"
+    "prod": "cross-env NODE_ENV=production node build/app.js",
+    "start": "node build/app.js"
   },
   "keywords": [],
   "author": "",

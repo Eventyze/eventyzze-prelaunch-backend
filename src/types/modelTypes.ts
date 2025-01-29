@@ -116,7 +116,6 @@ export interface EventAttributes {
     id: string;
     eventTitle: string;
     userId: string;
-    attendees: string[];
     description: string;
     date: Date;
     startTime: Date;
@@ -128,8 +127,6 @@ export interface EventAttributes {
     endTime: string;
     noOfLikes: number;
     noOfDislikes: number;
-    likers: string[]
-    dislikers: string[]
     isHosting: boolean;
     isHosted: boolean;
 }
@@ -168,4 +165,29 @@ export interface TransactionAttributes {
     userEventyzzeId: string;
     date: Date;
   }
+
+
+//================================ PAYMENT ===========================//
+
+export interface PaymentAttributes {
+    id: string;
+    userId: string;
+    eventId: string;
+    amount: number;
+    status: "pending" | "completed" | "failed";
+    paymentMethod?: string;
+    transactionId?: string;
+    paidAt?: Date;
+  }
+  
+
+
+//============================ ATTENDANCE ============================//
+export interface AttendanceAttributes {
+    id: string;
+    userId: string;
+    eventId: string;
+    attendedAt?: Date;
+  }
+  
   

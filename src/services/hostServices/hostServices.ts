@@ -2,8 +2,8 @@ import { ResponseDetails } from "../../types/generalTypes";
 import { errorUtilities, mailUtilities, recieptUtilities } from "../../utilities";
 import validator from "validator";
 import { JwtPayload } from "jsonwebtoken";
-import { EventAttributes, Roles, SubscriptionPlans, UserAttributes, WalletAttributes } from "../../types/modelTypes";
-import { eventRepositories, transactionRepositories, userRepositories, walletRepositories } from "../../repositories";
+import { AttendanceAttributes, EventAttributes, Roles, SubscriptionPlans, UserAttributes, WalletAttributes } from "../../types/modelTypes";
+import { attendanceRepositories, eventRepositories, transactionRepositories, userRepositories, walletRepositories } from "../../repositories";
 import { v4 } from "uuid";
 import { Transaction } from "sequelize";
 import { generalHelpers } from "../../helpers";
@@ -137,6 +137,8 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
 
     ]
 
+    await performTransaction.performTransaction(operations);
+
     await mailUtilities.sendMail(
       user.email,
       `Hello ${user.userName}, your event has been created, please do not forget to join on the selected date`,
@@ -204,140 +206,121 @@ const hostgetsAllTheirEventsService = errorUtilities.withErrorHandling(
 
     })
 
-const hostDeletesEvent = errorUtilities.withErrorHandling(
-  async (userId: string, eventId:string): Promise<Record<string, any>> => {
-    const responseHandler: ResponseDetails = {
-      statusCode: 0,
-      message: "",
-      data: {},
-      details: {},
-      info: {},
-    };
-
-    const user = await userRepositories.userRepositories.getOne({id:userId})
-
-    if(!user){
-      responseHandler.message = "User not found";
-      responseHandler.statusCode = 404;
-      return responseHandler;
-    }
-
-    const event = await eventRepositories.eventRepositories.getOne({id:eventId}) as unknown as EventAttributes
-
-    if (!event) {
-      responseHandler.message = "Event not found";
-      responseHandler.statusCode = 404;
-      return responseHandler;
-    }
-
-    if(event.userId !== userId){
-      responseHandler.message = "You cannot delete an event you did not create";
-      responseHandler.statusCode = 400;
-      return responseHandler;
-    }
-
-    if(event.isHosting){
-      responseHandler.message = "You cannot delete an event that is still ongoing. End the event first please";
-      responseHandler.statusCode = 400;
-      return responseHandler;
-    }
-
-    if (event.attendees.length && !event.isHosted) {
-
-      const eventCost = event.cost;
-
-      const eventWallet = await walletRepositories.walletRepositories.getOne({ownerId:event.id}) as unknown as WalletAttributes
-
-      for (const attendeeId of event.attendees) {
-
-        const attendee = await userRepositories.userRepositories.getOne({id:attendeeId}) as unknown as UserAttributes;
-
-        const attendeeWallet = await walletRepositories.walletRepositories.getOne({
-          ownerId: attendeeId,
-        }) as unknown as WalletAttributes;
-
-        if (!attendeeWallet) {
-          console.warn(`Wallet not found for attendee: ${attendeeId}`);
-          continue;
+    const hostDeletesEvent = errorUtilities.withErrorHandling(
+      async (userId: string, eventId: string): Promise<Record<string, any>> => {
+        const responseHandler: ResponseDetails = {
+          statusCode: 0,
+          message: "",
+          data: {},
+          details: {},
+          info: {},
+        };
+    
+        const user = await userRepositories.userRepositories.getOne({ id: userId });
+        if (!user) {
+          responseHandler.message = "User not found";
+          responseHandler.statusCode = 404;
+          return responseHandler;
         }
-        
-        const transactionReference = generalHelpers.generateTransactionReference(event.eventTitle)
-
-        const operations = [
-
-          async(transaction:Transaction) => {
-        await walletRepositories.walletRepositories.updateOne(
-          { id: attendeeWallet.id },
-          { ledgerBalance: attendeeWallet.ledgerBalance + eventCost },
-          transaction
-        );
-      },
-
-        async(transaction:Transaction) => {
-        await transactionRepositories.transactionRepositories.create({
-          id: v4(),
-          userUUId: attendeeId,
-          amount: eventCost,
-          type: "credit",
-          status: "completed",
-          date: new Date(),
-          reference: transactionReference,
-          userEventyzzeId: attendee.eventyzzeId,
-          description: `Refund from ${event.eventTitle} cancellation`
-        },
-        transaction
-      );
-        },
-
-        async(transaction:Transaction) => {
-        await walletRepositories.walletRepositories.updateOne(
-          { id: eventWallet.id },
-          { ledgerBalance: eventWallet.ledgerBalance - eventCost },
-          transaction
-        );
-        },
-
-      ]
-
-      await performTransaction.performTransaction(operations);
-
-      const transactionReciept = recieptUtilities({
-        reference: transactionReference,
-        amount: eventCost,
-        type: "credit",
-        status: "completed",
-        date: new Date(),
-        userEventyzzeId: "",
-        description: `Refund from ${event.eventTitle} cancellation`
-      })
-
-        try{
-          await mailUtilities.sendMail(
-            attendee.email,
-            transactionReciept,
-            "Transaction",
-          )
-        }catch(error:any){
-          console.log('delete event error:', error.message)
+    
+        const event = await eventRepositories.eventRepositories.getOne({ id: eventId }) as unknown as EventAttributes;
+        if (!event) {
+          responseHandler.message = "Event not found";
+          responseHandler.statusCode = 404;
+          return responseHandler;
         }
+    
+        if (event.userId !== userId) {
+          responseHandler.message = "You cannot delete an event you did not create";
+          responseHandler.statusCode = 400;
+          return responseHandler;
+        }
+    
+        if (event.isHosting) {
+          responseHandler.message = "You cannot delete an event that is still ongoing. End the event first please";
+          responseHandler.statusCode = 400;
+          return responseHandler;
+        }
+    
+        const attendees:any = await attendanceRepositories.attendanceRepositories.getMany({ eventId }) as unknown as AttendanceAttributes;
+        if (attendees.length && !event.isHosted) {
+          const eventCost = event.cost;
+          const eventWallet = await walletRepositories.walletRepositories.getOne({ ownerId: event.id }) as unknown as WalletAttributes;
+    
+          for (const attendee of attendees) {
+            const attendeeWallet = await walletRepositories.walletRepositories.getOne({ ownerId: attendee.userId }) as unknown as WalletAttributes;
+            if (!attendeeWallet) {
+              console.warn(`Wallet not found for attendee: ${attendee.userId}`);
+              continue;
+            }
+    
+            const transactionReference = generalHelpers.generateTransactionReference(event.eventTitle);
+    
+            const operations = [
+              async (transaction: Transaction) => {
+                await walletRepositories.walletRepositories.updateOne(
+                  { id: attendeeWallet.id },
+                  { ledgerBalance: attendeeWallet.ledgerBalance + eventCost },
+                  transaction
+                );
+              },
+              async (transaction: Transaction) => {
+                await transactionRepositories.transactionRepositories.create(
+                  {
+                    id: v4(),
+                    userUUId: attendee.userId,
+                    amount: eventCost,
+                    type: "credit",
+                    status: "completed",
+                    date: new Date(),
+                    reference: transactionReference,
+                    userEventyzzeId: attendee.eventyzzeId,
+                    description: `Refund from ${event.eventTitle} cancellation`,
+                  },
+                  transaction
+                );
+              },
+              async (transaction: Transaction) => {
+                await walletRepositories.walletRepositories.updateOne(
+                  { id: eventWallet.id },
+                  { ledgerBalance: eventWallet.ledgerBalance - eventCost },
+                  transaction
+                );
+              },
+            ];
+    
+            await performTransaction.performTransaction(operations);
+    
+            const transactionReceipt = recieptUtilities({
+              reference: transactionReference,
+              amount: eventCost,
+              type: "credit",
+              status: "completed",
+              date: new Date(),
+              userEventyzzeId: "",
+              description: `Refund from ${event.eventTitle} cancellation`,
+            });
+    
+            try {
+              await mailUtilities.sendMail(attendee.email, transactionReceipt, "Transaction");
+            } catch (error: any) {
+              console.log("delete event error:", error.message);
+            }
+          }
+    
+          await eventRepositories.eventRepositories.deleteOne({ id: eventId });
+          responseHandler.message = "Event deleted and refunds processed successfully";
+          responseHandler.statusCode = 200;
+          return responseHandler;
+        }
+    
+        await eventRepositories.eventRepositories.deleteOne({ id: eventId });
+        responseHandler.message = "Event deleted successfully";
+        responseHandler.statusCode = 200;
+        return responseHandler;
       }
-
-      const deletedEvent = await eventRepositories.eventRepositories.deleteOne({ id: eventId });
-
-      responseHandler.message = "Event deleted and refunds processed successfully";
-      responseHandler.statusCode = 200;
-      return responseHandler;
-
-    }
-
-    await eventRepositories.eventRepositories.deleteOne({ id: eventId });
-
-    responseHandler.message = "Event deleted successfully";
-    responseHandler.statusCode = 200;
-    return responseHandler;
-
-
-})
+    );
+    
 export default {
     getAllHostsService,
     hostCreatesEventService,

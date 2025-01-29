@@ -29,12 +29,6 @@ Events.init(
           onUpdate: "CASCADE",
       },
 
-      attendees: {
-          type: DataTypes.ARRAY(DataTypes.UUID),
-          allowNull: true,
-          defaultValue: [],
-      },
-
       description: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -65,18 +59,6 @@ Events.init(
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0
-      },
-
-      likers: {
-        type: DataTypes.ARRAY(DataTypes.UUID),
-        allowNull: true,
-        defaultValue: [],
-      },
-
-      dislikers: {
-        type: DataTypes.ARRAY(DataTypes.UUID),
-        allowNull: true,
-        defaultValue: [],
       },
 
       duration: {

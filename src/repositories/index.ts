@@ -5,7 +5,7 @@ import userRepositories from "./userRepository/userRepository.repositories";
 import walletRepositories from "./walletRepository/walletRepository.repositories";
 import eventRepositories from "./eventRepository/eventRepository.repositories";
 import transactionRepositories from './transactionRepository/transactionRepository.repositories';
-
+import attendanceRepositories from './attendanceRepository/attendanceRepository.repositories';
 
 export {
     otpRepositories,
@@ -14,5 +14,6 @@ export {
     userRepositories,
     walletRepositories,
     eventRepositories,
-    transactionRepositories
+    transactionRepositories,
+    attendanceRepositories
 }
