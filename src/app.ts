@@ -43,7 +43,7 @@ app.use(cookieParser());
 
 // Database
 database
-  .sync({force:true})
+  .sync({})
   .then(() => {
     console.log("Database is connected");
   })

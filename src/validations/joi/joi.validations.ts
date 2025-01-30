@@ -34,12 +34,19 @@ const userRegisterSchemaViaEmail = Joi.object({
 
 const verifyOtpSchema = Joi.object({
   email: Joi.string().required(),
-  otp: Joi.string().required().min(5)
+  otp: Joi.string().required().messages({
+    'string.email': 'OTP is required',
+  }).min(5)
 })
 
 const loginUserSchemaViaEmail = Joi.object({
-    email: Joi.string().trim().required().email(),
-    password: Joi.string().trim().required()
+    email: Joi.string().trim().required().email().messages({
+      'string.email': 'Email is required',
+    }),
+    password: Joi.string().trim().required().messages({
+      'string.base': 'password is required',
+    }),
+    deviceId: Joi.string().required()
 })
 
 const googleAuthSchema = Joi.object({
@@ -51,11 +58,15 @@ const facebookAuthSchema = Joi.object({
 });
 
 const requestPasswordResetSchema = Joi.object({
-  email: Joi.string().trim().email().required(),
+  email: Joi.string().trim().email().required().messages({
+    'string.email': 'Email is required',
+  }),
 });
 
 const resetPasswordSchema = Joi.object({
-  email: Joi.string().trim().email().required(),
+  email: Joi.string().trim().email().required().messages({
+    'string.email': 'Email is required',
+  }),
   otp: Joi.string().required().min(5),
   newPassword: Joi.string().trim().min(8).pattern(PASSWORD_PATTERN).required().messages({
     'string.pattern.base': 'Password must contain at least 8 characters comprising of at least one uppercase letter, one lowercase letter, one number and no spaces.'

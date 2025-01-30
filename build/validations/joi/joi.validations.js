@@ -34,11 +34,18 @@ const userRegisterSchemaViaEmail = joi_1.default.object({
 });
 const verifyOtpSchema = joi_1.default.object({
     email: joi_1.default.string().required(),
-    otp: joi_1.default.string().required().min(5)
+    otp: joi_1.default.string().required().messages({
+        'string.email': 'OTP is required',
+    }).min(5)
 });
 const loginUserSchemaViaEmail = joi_1.default.object({
-    email: joi_1.default.string().trim().required().email(),
-    password: joi_1.default.string().trim().required()
+    email: joi_1.default.string().trim().required().email().messages({
+        'string.email': 'Email is required',
+    }),
+    password: joi_1.default.string().trim().required().messages({
+        'string.base': 'password is required',
+    }),
+    deviceId: joi_1.default.string().required()
 });
 const googleAuthSchema = joi_1.default.object({
     token: joi_1.default.string().required(),
@@ -47,10 +54,14 @@ const facebookAuthSchema = joi_1.default.object({
     accessToken: joi_1.default.string().required(),
 });
 const requestPasswordResetSchema = joi_1.default.object({
-    email: joi_1.default.string().trim().email().required(),
+    email: joi_1.default.string().trim().email().required().messages({
+        'string.email': 'Email is required',
+    }),
 });
 const resetPasswordSchema = joi_1.default.object({
-    email: joi_1.default.string().trim().email().required(),
+    email: joi_1.default.string().trim().email().required().messages({
+        'string.email': 'Email is required',
+    }),
     otp: joi_1.default.string().required().min(5),
     newPassword: joi_1.default.string().trim().min(8).pattern(PASSWORD_PATTERN).required().messages({
         'string.pattern.base': 'Password must contain at least 8 characters comprising of at least one uppercase letter, one lowercase letter, one number and no spaces.'

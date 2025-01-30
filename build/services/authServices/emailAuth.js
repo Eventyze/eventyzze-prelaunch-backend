@@ -197,7 +197,7 @@ const userLogin = utilities_1.errorUtilities.withErrorHandling(async (loginPaylo
         throw utilities_1.errorUtilities.createError(responses_1.EmailAuthResponses.INCORRECT_PASSWORD, 400);
     }
     if (existingUser.activeDeviceId && existingUser.activeDeviceId !== deviceId) {
-        throw utilities_1.errorUtilities.createError(responses_1.EmailAuthResponses.ALREADY_LOGGED_IN, 404);
+        throw utilities_1.errorUtilities.createError(responses_1.EmailAuthResponses.ALREADY_LOGGED_IN, 403);
     }
     const tokenPayload = {
         id: existingUser.id,

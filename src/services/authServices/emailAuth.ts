@@ -305,7 +305,7 @@ const userLogin = errorUtilities.withErrorHandling(
     if (existingUser.activeDeviceId && existingUser.activeDeviceId !== deviceId) {
       throw errorUtilities.createError(
         EmailAuthResponses.ALREADY_LOGGED_IN,
-        404
+        403
       );
     }
 
