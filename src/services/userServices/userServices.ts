@@ -165,6 +165,8 @@ const userfirstimeProfileUpdateService = errorUtilities.withErrorHandling(
       state,
       country,
       address,
+      stateCode,
+      countryCode
     } = profilePayload
     
     const user = await userRepositories.userRepositories.getOne({id}) as unknown as UserAttributes;
@@ -188,11 +190,6 @@ const userfirstimeProfileUpdateService = errorUtilities.withErrorHandling(
       if (!validator.isMobilePhone(phone, "any")) {
         throw errorUtilities.createError("Invalid phone number", 400);
       }
-
-      const countryCode = countries.getAlpha2Code(country, 'en');
-
-      const stateCode = iso3166.subdivision(countryCode, state)?.code || state.substring(0, 2).toUpperCase();
-
       let userEventyzzeId;
 
       try {

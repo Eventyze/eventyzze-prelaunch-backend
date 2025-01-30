@@ -7,6 +7,7 @@ const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\W]{8,}$/
 const inputValidator = (schema: Joi.Schema):any => {
     return async (request: Request, response: Response, next: NextFunction):Promise<any> => {
       try {
+        console.log('bod',request.body.body)
         const { error } = schema.validate(request.body);
         if (error) {
           return response.status(400).json({
@@ -81,7 +82,7 @@ const firstTimeProfileUpdateSchema = Joi.object({
   bio: Joi.string().trim().required().messages({
     'string.base': 'bio is required'
   }),
-  interests: Joi.string().trim().required().messages({
+  interests: Joi.array().required().messages({
     'string.base': 'interests are required'
   }),
   phone: Joi.string().trim().required().messages({
@@ -99,10 +100,15 @@ const firstTimeProfileUpdateSchema = Joi.object({
   address: Joi.string().trim().required().messages({
     'string.base': 'address is required'
   }),
+  stateCode: Joi.string().trim().required().messages({
+    'string.base': 'state is required'
+  }),
+  countryCode: Joi.string().trim().required().messages({
+  'string.base': 'country is required'
+}),
 });
 
 
-//Event flow
 const createEventSchema = Joi.object({
   eventTitle: Joi.string().trim().required().messages({
     'string.base': 'Event title is required'

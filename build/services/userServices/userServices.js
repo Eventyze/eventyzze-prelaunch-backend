@@ -105,7 +105,7 @@ const userfirstimeProfileUpdateService = utilities_1.errorUtilities.withErrorHan
         info: {},
     };
     i18n_iso_countries_1.default.registerLocale(require('i18n-iso-countries/langs/en.json'));
-    let { id, userName, bio, interests, phone, fullName, state, country, address, } = profilePayload;
+    let { id, userName, bio, interests, phone, fullName, state, country, address, stateCode, countryCode } = profilePayload;
     const user = await repositories_1.userRepositories.userRepositories.getOne({ id });
     if (!user) {
         throw utilities_1.errorUtilities.createError("User not found", 404);
@@ -117,8 +117,6 @@ const userfirstimeProfileUpdateService = utilities_1.errorUtilities.withErrorHan
     if (!validator_1.default.isMobilePhone(phone, "any")) {
         throw utilities_1.errorUtilities.createError("Invalid phone number", 400);
     }
-    const countryCode = i18n_iso_countries_1.default.getAlpha2Code(country, 'en');
-    const stateCode = iso3166.subdivision(countryCode, state)?.code || state.substring(0, 2).toUpperCase();
     let userEventyzzeId;
     try {
         userEventyzzeId = await helpers_1.generalHelpers.generateUniqueUserEventyzzeId(countryCode, stateCode);
