@@ -2,7 +2,7 @@ import { ResponseDetails } from "../../types/generalTypes";
 import { errorUtilities } from "../../utilities";
 import validator from "validator";
 import { JwtPayload } from "jsonwebtoken";
-import { userRepositories } from "../../repositories";
+import { eventRepositories, userRepositories } from "../../repositories";
 import { UserAttributes } from "../../types/modelTypes";
 import countries from 'i18n-iso-countries';
 import { generalHelpers } from "../../helpers";
@@ -183,7 +183,7 @@ const userfirstimeProfileUpdateService = errorUtilities.withErrorHandling(
       if (confirmUserName) {
         throw errorUtilities.createError(
           "Username unavailable, please choose another username",
-          400
+          409
         );
       }
 
@@ -230,10 +230,72 @@ const userSwitchesToHostService = errorUtilities.withErrorHandling(
   }
 );
 
+const getAllLiveEventsService = errorUtilities.withErrorHandling(
+  async (): Promise<Record<string, any>> => {
+    const responseHandler: ResponseDetails = {
+      statusCode: 0,
+      message: "",
+      data: {},
+      details: {},
+      info: {},
+    };
+
+    const events: any = await eventRepositories.eventRepositories.getMany({isLive:true})
+
+    if(!events || events.length === 0){
+        responseHandler.statusCode = 404;
+        responseHandler.message = "No events found";
+        responseHandler.data = {
+            events
+        }
+        return responseHandler;
+    }
+
+    responseHandler.statusCode = 200;
+    responseHandler.message = "Events fetched successfully";
+    responseHandler.data = {
+      events
+    };
+    return responseHandler;
+  }
+);
+
+const getAllEventsService = errorUtilities.withErrorHandling(
+  async (): Promise<Record<string, any>> => {
+    const responseHandler: ResponseDetails = {
+      statusCode: 0,
+      message: "",
+      data: {},
+      details: {},
+      info: {},
+    };
+
+    const events: any = await eventRepositories.eventRepositories.getMany({})
+
+    if(!events || events.length === 0){
+        responseHandler.statusCode = 404;
+        responseHandler.message = "No events found";
+        responseHandler.data = {
+            events
+        }
+        return responseHandler;
+    }
+
+    responseHandler.statusCode = 200;
+    responseHandler.message = "Events fetched successfully";
+    responseHandler.data = {
+      events
+    };
+    return responseHandler;
+  }
+);
+
 
 export default {
   userProfileUpdateService,
   updateUserImageService,
   userSwitchesToHostService,
-  userfirstimeProfileUpdateService
+  userfirstimeProfileUpdateService,
+  getAllLiveEventsService,
+  getAllEventsService
 };

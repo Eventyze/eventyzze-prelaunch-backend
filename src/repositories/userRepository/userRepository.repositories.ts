@@ -110,8 +110,12 @@ const userRepositories = {
         noOfFollowers: userData.noOfFollowers,
         noOfFollowings: userData.noOfFollowings,
         id:userData.id,
+        isInitialHostingOfferExhausted:userData.isInitialHostingOfferExhausted,
+        eventyzzeId:userData.eventyzzeId,
         subscriptionDetails: userData.subscriptionDetails,
-        subScriptionId: userData.subScriptionId
+        subScriptionId: userData.subScriptionId,
+        state: userData.state,
+        address: userData.address,
       };
     } catch (error: any) {
       throw new Error(`Error fetching Users: ${error.message}`);

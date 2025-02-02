@@ -41,7 +41,7 @@ const userRegisterWithEmailService = errorUtilities.withErrorHandling(
     if (existingUser) {
       throw errorUtilities.createError(
         EmailAuthResponses.ALREADY_EXISTING_USER,
-        400
+        409
       );
     }
 
@@ -245,27 +245,15 @@ const userLogin = errorUtilities.withErrorHandling(
 
     const projection = [
       "password",
-      "id",
       "email",
+      "id",
+      "role",
       "isVerified",
       "isBlacklisted",
-      "role",
-      "numberOfEventsHosted",
-      "numberOfEventsAttended",
-      "bio",
-      "userImage",
-      "country",
-      "subscriptionPlan",
-      "interests",
-      "noOfFollowers",
-      "noOfFollowings",
+      "activeDeviceId",
       "refreshToken",
       "isInitialProfileSetupDone",
       "fullName",
-      "userName",
-      "accountStatus",
-      "subScriptionId",
-      "subscriptionDetails",
     ];
 
     const filter = { email: email.trim() };
@@ -305,7 +293,7 @@ const userLogin = errorUtilities.withErrorHandling(
     if (existingUser.activeDeviceId && existingUser.activeDeviceId !== deviceId) {
       throw errorUtilities.createError(
         EmailAuthResponses.ALREADY_LOGGED_IN,
-        403
+        409
       );
     }
 
@@ -328,7 +316,7 @@ const userLogin = errorUtilities.withErrorHandling(
 
     if (!existingUser.refreshToken || !existingUser.isInitialProfileSetupDone) {
       mailMessage = `Welcome to Eventyzze ${
-        existingUser.name ? existingUser.name : ""
+        existingUser.fullName ? existingUser.fullName : ""
       }! <br /><br />
 
           We're excited to have you on board. Eventyzze is your go-to platform for discovering, organizing, and sharing amazing events. Whether you're attending or hosting, we're here to make your experience seamless and enjoyable. <br /> <br />
@@ -338,11 +326,11 @@ const userLogin = errorUtilities.withErrorHandling(
           Let's make some unforgettable moments together!`;
 
       mailSubject = `Welcome to Eventyzze ${
-        existingUser.name ? existingUser.name : ""
+        existingUser.fullName ? existingUser.fullName : ""
       }`;
     } else {
       mailSubject = "Activity Detected on Your Account";
-      mailMessage = `Hi ${existingUser.name ? existingUser.name : ""},
+      mailMessage = `Hi ${existingUser.fullName ? existingUser.fullName : ""},
       There was a login to your account on ${dateDetails.date} by ${
         dateDetails.time
       }.<br /><br /> If you did not initiate this login, contact our support team to restrict your account. If it was you, please ignore.`;
@@ -352,12 +340,17 @@ const userLogin = errorUtilities.withErrorHandling(
 
     existingUser.activeDeviceId = deviceId;
 
-    await existingUser.save();
+    await userRepositories.userRepositories.updateOne({email}, {refreshToken:refreshToken})
 
-    const userWithoutPassword =
-      await userRepositories.userRepositories.extractUserDetails(existingUser);
+    console.log('existingUser', existingUser)
 
-    delete userWithoutPassword.refreshToken;
+    const newExistingUser:any =
+      await userRepositories.userRepositories.getOne(filter);
+
+    
+    const userWithoutPassword = await userRepositories.userRepositories.extractUserDetails(newExistingUser)
+
+    console.log('checkUser', userWithoutPassword)
 
     await mailUtilities.sendMail(existingUser.email, mailMessage, mailSubject);
 
@@ -482,7 +475,6 @@ const userLogoutService = errorUtilities.withErrorHandling(
     const user = await userRepositories.userRepositories.getOne({ email }) as unknown as UserAttributes;
   
     if (user) {
-      user.activeDeviceId = null;
       await userRepositories.userRepositories.updateOne({email}, {activeDeviceId:null})
     }
 

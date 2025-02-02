@@ -64,11 +64,14 @@ Events.init({
         type: sequelize_1.DataTypes.DATE,
         allowNull: true,
     },
+    dyteDetails: {
+        type: sequelize_1.DataTypes
+    },
     hostJoinTime: {
         type: sequelize_1.DataTypes.DATE,
         allowNull: true,
     },
-    isHosting: {
+    isLive: {
         type: sequelize_1.DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false

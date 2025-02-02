@@ -38,6 +38,8 @@ export interface UserAttributes {
     subScriptionId: string;
     activeDeviceId: any;
     subscriptionDetails: subscriptionDetails;
+    freeHoursUsed:number
+    continent: string;
 }
 
 export enum Roles {
@@ -129,8 +131,12 @@ export interface EventAttributes {
     endTime: string;
     noOfLikes: number;
     noOfDislikes: number;
-    isHosting: boolean;
+    isLive: boolean;
     isHosted: boolean;
+}
+
+export interface DyetDetials {
+
 }
 
 

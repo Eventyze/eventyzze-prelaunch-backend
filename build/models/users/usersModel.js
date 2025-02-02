@@ -25,6 +25,10 @@ User.init({
             msg: "Username already in use, please choose another",
         },
     },
+    freeHoursUsed: {
+        type: sequelize_1.DataTypes.INTEGER,
+        defaultValue: 0,
+    },
     eventyzzeId: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
@@ -88,6 +92,10 @@ User.init({
         allowNull: true,
     },
     country: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: true,
+    },
+    continent: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: true,
     },

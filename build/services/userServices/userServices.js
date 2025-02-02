@@ -112,7 +112,7 @@ const userfirstimeProfileUpdateService = utilities_1.errorUtilities.withErrorHan
     }
     const confirmUserName = await repositories_1.userRepositories.userRepositories.getOne({ userName }, ["userName"]);
     if (confirmUserName) {
-        throw utilities_1.errorUtilities.createError("Username unavailable, please choose another username", 400);
+        throw utilities_1.errorUtilities.createError("Username unavailable, please choose another username", 409);
     }
     if (!validator_1.default.isMobilePhone(phone, "any")) {
         throw utilities_1.errorUtilities.createError("Invalid phone number", 400);
@@ -144,9 +144,59 @@ const userSwitchesToHostService = utilities_1.errorUtilities.withErrorHandling(a
     };
     return responseHandler;
 });
+const getAllLiveEventsService = utilities_1.errorUtilities.withErrorHandling(async () => {
+    const responseHandler = {
+        statusCode: 0,
+        message: "",
+        data: {},
+        details: {},
+        info: {},
+    };
+    const events = await repositories_1.eventRepositories.eventRepositories.getMany({ isLive: true });
+    if (!events || events.length === 0) {
+        responseHandler.statusCode = 404;
+        responseHandler.message = "No events found";
+        responseHandler.data = {
+            events
+        };
+        return responseHandler;
+    }
+    responseHandler.statusCode = 200;
+    responseHandler.message = "Events fetched successfully";
+    responseHandler.data = {
+        events
+    };
+    return responseHandler;
+});
+const getAllEventsService = utilities_1.errorUtilities.withErrorHandling(async () => {
+    const responseHandler = {
+        statusCode: 0,
+        message: "",
+        data: {},
+        details: {},
+        info: {},
+    };
+    const events = await repositories_1.eventRepositories.eventRepositories.getMany({});
+    if (!events || events.length === 0) {
+        responseHandler.statusCode = 404;
+        responseHandler.message = "No events found";
+        responseHandler.data = {
+            events
+        };
+        return responseHandler;
+    }
+    responseHandler.statusCode = 200;
+    responseHandler.message = "Events fetched successfully";
+    responseHandler.data = {
+        events
+    };
+    return responseHandler;
+});
 exports.default = {
     userProfileUpdateService,
     updateUserImageService,
     userSwitchesToHostService,
-    userfirstimeProfileUpdateService
+    userfirstimeProfileUpdateService,
+    getAllLiveEventsService,
+    getAllEventsService
 };

@@ -71,12 +71,16 @@ Events.init(
         allowNull: true,
       },
 
+      dyteDetails: {
+        type: DataTypes
+      },
+
       hostJoinTime: {
         type: DataTypes.DATE,
         allowNull: true,
       },
 
-      isHosting: {
+      isLive: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false

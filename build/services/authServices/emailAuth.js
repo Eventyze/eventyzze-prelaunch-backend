@@ -28,7 +28,7 @@ const userRegisterWithEmailService = utilities_1.errorUtilities.withErrorHandlin
         email,
     }));
     if (existingUser) {
-        throw utilities_1.errorUtilities.createError(responses_1.EmailAuthResponses.ALREADY_EXISTING_USER, 400);
+        throw utilities_1.errorUtilities.createError(responses_1.EmailAuthResponses.ALREADY_EXISTING_USER, 409);
     }
     const userId = (0, uuid_1.v4)();
     const { otp, expiresAt } = await helpers_1.generalHelpers.generateOtp();
@@ -156,27 +156,15 @@ const userLogin = utilities_1.errorUtilities.withErrorHandling(async (loginPaylo
     const { email, password, deviceId } = loginPayload;
     const projection = [
         "password",
-        "id",
         "email",
+        "id",
+        "role",
         "isVerified",
         "isBlacklisted",
-        "role",
-        "numberOfEventsHosted",
-        "numberOfEventsAttended",
-        "bio",
-        "userImage",
-        "country",
-        "subscriptionPlan",
-        "interests",
-        "noOfFollowers",
-        "noOfFollowings",
+        "activeDeviceId",
         "refreshToken",
         "isInitialProfileSetupDone",
         "fullName",
-        "userName",
-        "accountStatus",
-        "subScriptionId",
-        "subscriptionDetails",
     ];
     const filter = { email: email.trim() };
     const existingUser = await repositories_1.userRepositories.userRepositories.getOne(filter, projection);
@@ -197,7 +185,7 @@ const userLogin = utilities_1.errorUtilities.withErrorHandling(async (loginPaylo
         throw utilities_1.errorUtilities.createError(responses_1.EmailAuthResponses.INCORRECT_PASSWORD, 400);
     }
     if (existingUser.activeDeviceId && existingUser.activeDeviceId !== deviceId) {
-        throw utilities_1.errorUtilities.createError(responses_1.EmailAuthResponses.ALREADY_LOGGED_IN, 403);
+        throw utilities_1.errorUtilities.createError(responses_1.EmailAuthResponses.ALREADY_LOGGED_IN, 409);
     }
     const tokenPayload = {
         id: existingUser.id,
@@ -210,25 +198,27 @@ const userLogin = utilities_1.errorUtilities.withErrorHandling(async (loginPaylo
     let mailSubject = "";
     const dateDetails = helpers_1.generalHelpers.dateFormatter(new Date());
     if (!existingUser.refreshToken || !existingUser.isInitialProfileSetupDone) {
-        mailMessage = `Welcome to Eventyzze ${existingUser.name ? existingUser.name : ""}! <br /><br />
+        mailMessage = `Welcome to Eventyzze ${existingUser.fullName ? existingUser.fullName : ""}! <br /><br />
 
           We're excited to have you on board. Eventyzze is your go-to platform for discovering, organizing, and sharing amazing events. Whether you're attending or hosting, we're here to make your experience seamless and enjoyable. <br /> <br />
 
           If you have any questions or need help getting started, feel free to reach out to our support team. We're always here to assist you. <br /> <br />
 
           Let's make some unforgettable moments together!`;
-        mailSubject = `Welcome to Eventyzze ${existingUser.name ? existingUser.name : ""}`;
+        mailSubject = `Welcome to Eventyzze ${existingUser.fullName ? existingUser.fullName : ""}`;
     }
     else {
         mailSubject = "Activity Detected on Your Account";
-        mailMessage = `Hi ${existingUser.name ? existingUser.name : ""},
+        mailMessage = `Hi ${existingUser.fullName ? existingUser.fullName : ""},
       There was a login to your account on ${dateDetails.date} by ${dateDetails.time}.<br /><br /> If you did not initiate this login, contact our support team to restrict your account. If it was you, please ignore.`;
     }
     existingUser.refreshToken = refreshToken;
     existingUser.activeDeviceId = deviceId;
-    await existingUser.save();
-    const userWithoutPassword = await repositories_1.userRepositories.userRepositories.extractUserDetails(existingUser);
-    delete userWithoutPassword.refreshToken;
+    await repositories_1.userRepositories.userRepositories.updateOne({ email }, { refreshToken: refreshToken });
+    console.log('existingUser', existingUser);
+    const newExistingUser = await repositories_1.userRepositories.userRepositories.getOne(filter);
+    const userWithoutPassword = await repositories_1.userRepositories.userRepositories.extractUserDetails(newExistingUser);
+    console.log('checkUser', userWithoutPassword);
     await utilities_1.mailUtilities.sendMail(existingUser.email, mailMessage, mailSubject);
     responseHandler.statusCode = 200;
     responseHandler.message =
@@ -309,7 +299,6 @@ const userLogoutService = utilities_1.errorUtilities.withErrorHandling(async (lo
     const { email } = logoutPayload;
     const user = await repositories_1.userRepositories.userRepositories.getOne({ email });
     if (user) {
-        user.activeDeviceId = null;
         await repositories_1.userRepositories.userRepositories.updateOne({ email }, { activeDeviceId: null });
     }
     responseHandler.message = responses_1.EmailAuthResponses.LOGOUT_MESSAGE;

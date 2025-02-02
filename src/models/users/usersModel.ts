@@ -32,6 +32,11 @@ User.init(
       },
     },
 
+    freeHoursUsed: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+
     eventyzzeId: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -106,6 +111,11 @@ User.init(
     },
 
     country: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    continent: {
       type: DataTypes.STRING,
       allowNull: true,
     },

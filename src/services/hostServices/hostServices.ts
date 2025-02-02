@@ -236,7 +236,7 @@ const hostgetsAllTheirEventsService = errorUtilities.withErrorHandling(
           return responseHandler;
         }
     
-        if (event.isHosting) {
+        if (event.isLive) {
           responseHandler.message = "You cannot delete an event that is still ongoing. End the event first please";
           responseHandler.statusCode = 400;
           return responseHandler;
