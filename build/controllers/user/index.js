@@ -13,11 +13,19 @@ const firstTimeProfileUpdate = async (request, response) => {
     return utilities_1.responseUtilities.responseHandler(response, newUpdate.message, newUpdate.statusCode, newUpdate.data);
 };
 const changeUserImage = async (request, response) => {
-    const newUserImage = await services_1.userServices.updateUserImageService(request);
+    const { id } = request.user;
+    const imageUrl = request?.files?.['image'] ? request.files['image'][0].path : null;
+    const newUserImage = await services_1.userServices.updateUserImageService(imageUrl, id);
     return utilities_1.responseUtilities.responseHandler(response, newUserImage.message, newUserImage.statusCode, newUserImage.data);
+};
+const confirmUserName = async (request, response) => {
+    const { userName } = request.query;
+    const userNameConfirmation = await services_1.userServices.confirmUserNameService(userName);
+    return utilities_1.responseUtilities.responseHandler(response, userNameConfirmation.message, userNameConfirmation.statusCode);
 };
 exports.default = {
     updateUserProfile,
     changeUserImage,
-    firstTimeProfileUpdate
+    firstTimeProfileUpdate,
+    confirmUserName
 };

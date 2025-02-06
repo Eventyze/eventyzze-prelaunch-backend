@@ -40,12 +40,12 @@ Events.init(
       },
 
       date: {
-        type: DataTypes.DATE,
+        type: DataTypes.STRING,
         allowNull: false,
       },
 
       startTime: {
-        type: DataTypes.DATE,
+        type: DataTypes.STRING,
         allowNull: false,
       },
 
@@ -64,20 +64,23 @@ Events.init(
       duration: {
         type: DataTypes.STRING,
         allowNull: true,
+        defaultValue: null
       },
 
       endTime: {
-        type: DataTypes.DATE,
+        type: DataTypes.STRING,
         allowNull: true,
       },
 
       dyteDetails: {
-        type: DataTypes
+        type: DataTypes.JSON,
+        allowNull: true,
       },
 
       hostJoinTime: {
-        type: DataTypes.DATE,
+        type: DataTypes.STRING,
         allowNull: true,
+        defaultValue: null
       },
 
       isLive: {
@@ -93,13 +96,23 @@ Events.init(
       },
 
       cost: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+
+      currency: {
+        type: DataTypes.STRING,
         allowNull: false,
       },
 
       coverImage: {
         type: DataTypes.STRING,
         allowNull: false,
+      },
+
+      videoUrl: {
+        type: DataTypes.STRING,
+        allowNull: false
       }
 
   },

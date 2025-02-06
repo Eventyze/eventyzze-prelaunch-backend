@@ -25,6 +25,7 @@ User.init({
             msg: "Username already in use, please choose another",
         },
     },
+    //change to Hours Left, then give user 2 at creation.
     freeHoursUsed: {
         type: sequelize_1.DataTypes.INTEGER,
         defaultValue: 0,
@@ -92,10 +93,6 @@ User.init({
         allowNull: true,
     },
     country: {
-        type: sequelize_1.DataTypes.STRING,
-        allowNull: true,
-    },
-    continent: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: true,
     },
@@ -179,7 +176,7 @@ User.init({
         allowNull: false,
         defaultValue: {
             type: modelTypes_1.SubscriptionPlans.Free,
-            hasPaid: false,
+            hasPaid: true,
             dateOfPayment: new Date(),
             dateOfExpiry: null,
             autoRenew: false

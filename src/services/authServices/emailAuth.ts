@@ -309,6 +309,8 @@ const userLogin = errorUtilities.withErrorHandling(
       "30d"
     );
 
+    console.log('toks', accessToken)
+
     let mailMessage = "";
     let mailSubject = "";
 

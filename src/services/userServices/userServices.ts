@@ -110,27 +110,22 @@ const userProfileUpdateService = errorUtilities.withErrorHandling(
 );
 
 const updateUserImageService = errorUtilities.withErrorHandling(
-  async (request: JwtPayload): Promise<any> => {
+  async (imageUrl: string, id:string): Promise<any> => {
     const responseHandler: ResponseDetails = {
       statusCode: 0,
       message: "",
     };
 
-      const imageUpdate = request?.file?.path;
-      console.log('imageUpdate', imageUpdate)
-
-      if (!imageUpdate) {
+      if (!imageUrl) {
         throw errorUtilities.createError("Select an Image", 400);
       }
-
-    const { id } = request.user;
 
     const newMovie: any = await userRepositories.userRepositories.updateOne(
       {
         id,
       },
       {
-        userImage: imageUpdate
+        userImage: imageUrl
       }
     );
 
@@ -153,8 +148,6 @@ const userfirstimeProfileUpdateService = errorUtilities.withErrorHandling(
       info: {},
     };
 
-    countries.registerLocale(require('i18n-iso-countries/langs/en.json'))
-
     let {
       id,
       userName,
@@ -174,18 +167,6 @@ const userfirstimeProfileUpdateService = errorUtilities.withErrorHandling(
     if (!user) {
       throw errorUtilities.createError("User not found", 404);
     }
-
-      const confirmUserName = await userRepositories.userRepositories.getOne(
-        { userName },
-        ["userName"]
-      );
-
-      if (confirmUserName) {
-        throw errorUtilities.createError(
-          "Username unavailable, please choose another username",
-          409
-        );
-      }
 
       if (!validator.isMobilePhone(phone, "any")) {
         throw errorUtilities.createError("Invalid phone number", 400);
@@ -215,6 +196,34 @@ const userfirstimeProfileUpdateService = errorUtilities.withErrorHandling(
     return responseHandler;
   }
 );
+
+const confirmUserNameService = errorUtilities.withErrorHandling(
+  async (userName: string) => {
+    const responseHandler: ResponseDetails = {
+      statusCode: 0,
+      message: "",
+      data: {},
+      details: {},
+      info: {},
+    };
+
+    const confirmUserName = await userRepositories.userRepositories.getOne(
+      { userName },
+      ["userName"]
+    );
+
+    if (confirmUserName) {
+      throw errorUtilities.createError(
+        "Username unavailable, please choose another username",
+        400
+      );
+    }
+
+    responseHandler.message = "Username Available"
+    responseHandler.statusCode = 200;
+    return responseHandler;
+
+  })
 
 const userSwitchesToHostService = errorUtilities.withErrorHandling(
   async (userPayload: Record<string, any>): Promise<Record<string, any>> => {
@@ -297,5 +306,6 @@ export default {
   userSwitchesToHostService,
   userfirstimeProfileUpdateService,
   getAllLiveEventsService,
-  getAllEventsService
+  getAllEventsService, 
+  confirmUserNameService
 };

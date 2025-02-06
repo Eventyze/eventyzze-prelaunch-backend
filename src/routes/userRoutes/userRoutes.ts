@@ -26,6 +26,7 @@ router.post(
   joiValidators.inputValidator(joiValidators.resetPasswordSchema),
   userAuthController.resetPassword
 );
+router.get('/username-confirm', userController.confirmUserName)
 
 router.post('/logout', userAuthController.userLogout)
 

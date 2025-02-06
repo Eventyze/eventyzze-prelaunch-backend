@@ -4,6 +4,7 @@ import otpGenerator from 'otp-generator';
 import { APP_SECRET } from '../../configurations/envKeys';
 import { userRepositories } from '../../repositories';
 import { v1 as uuidv1 } from 'uuid';
+import dayjs from 'dayjs';
 // import { ResponseDetails } from '../../types/utilities.types';
 // import { errorUtilities } from '../../utilities';
 // import { QueryParameters } from '../../types/helpers.types';
@@ -262,6 +263,14 @@ const generateUniqueUserEventyzzeId = async (
   // };
   
 
+  // Function to calculate endTime
+  const calculateEndTime = (startTime: string, duration: number, startDate:string) => {
+    const start = dayjs(`${startDate}T${startTime}`);
+    const end = start.add(duration, "minute");
+    return end.format("HH:mm");
+  };
+
+
 export default {
   hashPassword,
   validatePassword,
@@ -272,5 +281,6 @@ export default {
   dateFormatter,
   // verifyRegistrationToken
   generateTransactionReference,
-  generateUniqueUserEventyzzeId
+  generateUniqueUserEventyzzeId,
+  calculateEndTime
 };

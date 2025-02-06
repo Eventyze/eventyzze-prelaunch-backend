@@ -39,7 +39,6 @@ export interface UserAttributes {
     activeDeviceId: any;
     subscriptionDetails: subscriptionDetails;
     freeHoursUsed:number
-    continent: string;
 }
 
 export enum Roles {
@@ -121,10 +120,11 @@ export interface EventAttributes {
     eventTitle: string;
     userId: string;
     description: string;
-    date: Date;
-    startTime: Date;
+    date: string;
+    startTime: string;
     duration: string;
-    cost: number;
+    cost: string;
+    currency: string;
     eventAd: string;
     coverImage: string;
     hostJoinTime: string;
@@ -133,10 +133,15 @@ export interface EventAttributes {
     noOfDislikes: number;
     isLive: boolean;
     isHosted: boolean;
+    dyteDetails: DyteDetials;
+    videoUrl: string;
 }
 
-export interface DyetDetials {
-
+export interface DyteDetials {
+    meetingId: string;
+    meetingTitle: string;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 

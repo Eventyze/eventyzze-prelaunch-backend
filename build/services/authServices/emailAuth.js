@@ -194,6 +194,7 @@ const userLogin = utilities_1.errorUtilities.withErrorHandling(async (loginPaylo
     };
     const accessToken = await helpers_1.generalHelpers.generateTokens(tokenPayload, "2h");
     const refreshToken = await helpers_1.generalHelpers.generateTokens(tokenPayload, "30d");
+    console.log('toks', accessToken);
     let mailMessage = "";
     let mailSubject = "";
     const dateDetails = helpers_1.generalHelpers.dateFormatter(new Date());

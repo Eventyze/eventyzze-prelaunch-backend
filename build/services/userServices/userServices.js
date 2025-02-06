@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const utilities_1 = require("../../utilities");
 const validator_1 = __importDefault(require("validator"));
 const repositories_1 = require("../../repositories");
-const i18n_iso_countries_1 = __importDefault(require("i18n-iso-countries"));
 const helpers_1 = require("../../helpers");
 const iso3166 = require('iso3166-2-db');
 const userProfileUpdateService = utilities_1.errorUtilities.withErrorHandling(async (profilePayload) => {
@@ -73,21 +72,18 @@ const userProfileUpdateService = utilities_1.errorUtilities.withErrorHandling(as
     };
     return responseHandler;
 });
-const updateUserImageService = utilities_1.errorUtilities.withErrorHandling(async (request) => {
+const updateUserImageService = utilities_1.errorUtilities.withErrorHandling(async (imageUrl, id) => {
     const responseHandler = {
         statusCode: 0,
         message: "",
     };
-    const imageUpdate = request?.file?.path;
-    console.log('imageUpdate', imageUpdate);
-    if (!imageUpdate) {
+    if (!imageUrl) {
         throw utilities_1.errorUtilities.createError("Select an Image", 400);
     }
-    const { id } = request.user;
     const newMovie = await repositories_1.userRepositories.userRepositories.updateOne({
         id,
     }, {
-        userImage: imageUpdate
+        userImage: imageUrl
     });
     responseHandler.statusCode = 200;
     responseHandler.message = "Movie image changed successfully";
@@ -104,15 +100,10 @@ const userfirstimeProfileUpdateService = utilities_1.errorUtilities.withErrorHan
         details: {},
         info: {},
     };
-    i18n_iso_countries_1.default.registerLocale(require('i18n-iso-countries/langs/en.json'));
     let { id, userName, bio, interests, phone, fullName, state, country, address, stateCode, countryCode } = profilePayload;
     const user = await repositories_1.userRepositories.userRepositories.getOne({ id });
     if (!user) {
         throw utilities_1.errorUtilities.createError("User not found", 404);
-    }
-    const confirmUserName = await repositories_1.userRepositories.userRepositories.getOne({ userName }, ["userName"]);
-    if (confirmUserName) {
-        throw utilities_1.errorUtilities.createError("Username unavailable, please choose another username", 409);
     }
     if (!validator_1.default.isMobilePhone(phone, "any")) {
         throw utilities_1.errorUtilities.createError("Invalid phone number", 400);
@@ -132,6 +123,22 @@ const userfirstimeProfileUpdateService = utilities_1.errorUtilities.withErrorHan
     responseHandler.data = {
         user: newUser,
     };
+    return responseHandler;
+});
+const confirmUserNameService = utilities_1.errorUtilities.withErrorHandling(async (userName) => {
+    const responseHandler = {
+        statusCode: 0,
+        message: "",
+        data: {},
+        details: {},
+        info: {},
+    };
+    const confirmUserName = await repositories_1.userRepositories.userRepositories.getOne({ userName }, ["userName"]);
+    if (confirmUserName) {
+        throw utilities_1.errorUtilities.createError("Username unavailable, please choose another username", 400);
+    }
+    responseHandler.message = "Username Available";
+    responseHandler.statusCode = 200;
     return responseHandler;
 });
 const userSwitchesToHostService = utilities_1.errorUtilities.withErrorHandling(async (userPayload) => {
@@ -198,5 +205,6 @@ exports.default = {
     userSwitchesToHostService,
     userfirstimeProfileUpdateService,
     getAllLiveEventsService,
-    getAllEventsService
+    getAllEventsService,
+    confirmUserNameService
 };

@@ -39,11 +39,11 @@ Events.init({
         allowNull: true,
     },
     date: {
-        type: sequelize_1.DataTypes.DATE,
+        type: sequelize_1.DataTypes.STRING,
         allowNull: false,
     },
     startTime: {
-        type: sequelize_1.DataTypes.DATE,
+        type: sequelize_1.DataTypes.STRING,
         allowNull: false,
     },
     noOfLikes: {
@@ -59,17 +59,20 @@ Events.init({
     duration: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: true,
+        defaultValue: null
     },
     endTime: {
-        type: sequelize_1.DataTypes.DATE,
+        type: sequelize_1.DataTypes.STRING,
         allowNull: true,
     },
     dyteDetails: {
-        type: sequelize_1.DataTypes
+        type: sequelize_1.DataTypes.JSON,
+        allowNull: true,
     },
     hostJoinTime: {
-        type: sequelize_1.DataTypes.DATE,
+        type: sequelize_1.DataTypes.STRING,
         allowNull: true,
+        defaultValue: null
     },
     isLive: {
         type: sequelize_1.DataTypes.BOOLEAN,
@@ -82,12 +85,20 @@ Events.init({
         defaultValue: false
     },
     cost: {
-        type: sequelize_1.DataTypes.INTEGER,
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: false,
+    },
+    currency: {
+        type: sequelize_1.DataTypes.STRING,
         allowNull: false,
     },
     coverImage: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
+    },
+    videoUrl: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: false
     }
 }, {
     sequelize: database_1.database,

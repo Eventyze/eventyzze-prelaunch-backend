@@ -47,7 +47,11 @@ const changeUserImage = async (
   response: Response
 ): Promise<any> => {
 
-  const newUserImage: any = await userServices.updateUserImageService(request)
+  const { id } = request.user
+
+  const imageUrl = request?.files?.['image'] ? request.files['image'][0].path : null;
+
+  const newUserImage: any = await userServices.updateUserImageService(imageUrl, id)
 
   return responseUtilities.responseHandler(
     response,
@@ -57,9 +61,23 @@ const changeUserImage = async (
   );
 };
 
+const confirmUserName = async (
+  request: JwtPayload,
+  response: Response
+): Promise<any> => {
+  const { userName } = request.query;
 
+  const userNameConfirmation = await userServices.confirmUserNameService(userName)
+
+  return responseUtilities.responseHandler(
+    response,
+    userNameConfirmation.message,
+    userNameConfirmation.statusCode
+  );
+}
 export default {
     updateUserProfile,
     changeUserImage,
-    firstTimeProfileUpdate
+    firstTimeProfileUpdate,
+    confirmUserName
 }

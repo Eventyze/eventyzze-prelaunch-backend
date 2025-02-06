@@ -9,6 +9,7 @@ const otp_generator_1 = __importDefault(require("otp-generator"));
 const envKeys_1 = require("../../configurations/envKeys");
 const repositories_1 = require("../../repositories");
 const uuid_1 = require("uuid");
+const dayjs_1 = __importDefault(require("dayjs"));
 // import { ResponseDetails } from '../../types/utilities.types';
 // import { errorUtilities } from '../../utilities';
 // import { QueryParameters } from '../../types/helpers.types';
@@ -211,6 +212,12 @@ const generateUniqueUserEventyzzeId = async (countryCode, stateCode, maxRetries 
 //   }
 //   return query;
 // };
+// Function to calculate endTime
+const calculateEndTime = (startTime, duration, startDate) => {
+    const start = (0, dayjs_1.default)(`${startDate}T${startTime}`);
+    const end = start.add(duration, "minute");
+    return end.format("HH:mm");
+};
 exports.default = {
     hashPassword,
     validatePassword,
@@ -221,5 +228,6 @@ exports.default = {
     dateFormatter,
     // verifyRegistrationToken
     generateTransactionReference,
-    generateUniqueUserEventyzzeId
+    generateUniqueUserEventyzzeId,
+    calculateEndTime
 };

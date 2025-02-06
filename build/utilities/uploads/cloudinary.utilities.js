@@ -20,13 +20,15 @@ const storage = new multer_storage_cloudinary_1.CloudinaryStorage({
         try {
             if (!file)
                 throw new Error("File is required");
+            const isVideo = file.mimetype.startsWith("video/");
             return {
-                folder: "Eventyzze"
+                folder: isVideo ? "Eventyzze/Videos" : "Eventyzze/Images",
+                resource_type: isVideo ? "video" : "image",
             };
         }
         catch (error) {
             console.error(`Cloudinary storage error: ${error.message}`);
-            throw error;
+            throw error.message;
         }
     }
 });
@@ -34,17 +36,14 @@ const cloud = (0, multer_1.default)({
     storage: storage,
     fileFilter: (req, file, cb) => {
         try {
-            if (file.mimetype == "image/png" ||
-                file.mimetype == "image/jpg" ||
-                file.mimetype == "image/jpeg" ||
-                file.mimetype == "image/webp" ||
-                file.mimetype == "image/avif") {
+            if (file.mimetype.startsWith("image/") ||
+                file.mimetype.startsWith("video/")) {
                 cb(null, true);
             }
             else {
                 console.error(`Invalid file type: ${file.mimetype}`);
                 cb(null, false);
-                return cb(new Error("Only .png, .jpg, .jpeg, .webp, .avif formats are allowed"));
+                return cb(new Error("Only image and video formats are allowed"));
             }
         }
         catch (error) {
@@ -53,29 +52,19 @@ const cloud = (0, multer_1.default)({
         }
     },
     limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB limit
+        fileSize: 50 * 1024 * 1024
     }
-}).single('image');
-// Create a wrapper function to handle upload errors
+}).fields([{ name: "image", maxCount: 1 }, { name: "video", maxCount: 1 }]);
 const upload = (req, res, next) => {
     cloud(req, res, (error) => {
         if (error instanceof multer_1.default.MulterError) {
-            // A Multer error occurred when uploading
             console.error(`Multer error: ${error.message}`);
-            return res.status(400).json({
-                status: 'error',
-                message: error.message
-            });
+            return res.status(400).json({ status: 'error', message: error.message });
         }
         else if (error) {
-            // An unknown error occurred when uploading
             console.error(`Upload error: ${error.message}`);
-            return res.status(500).json({
-                status: 'error',
-                message: error.message
-            });
+            return res.status(500).json({ status: 'error', message: error.message });
         }
-        // Everything went fine
         next();
     });
 };

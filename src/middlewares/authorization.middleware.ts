@@ -100,14 +100,6 @@ export const generalAuthFunction = async (
       });
     }
 
-    const filter = { id: verifiedUser.id };
-
-    const projection = [ 'isVerified' ];
-
-    const userDetails:any = await userRepositories.userRepositories.getOne(filter, projection)
-
-    console.log('auth1', userDetails)
-
       request.user = verifiedUser;
 
       return next();

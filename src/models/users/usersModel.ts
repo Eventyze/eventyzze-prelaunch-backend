@@ -31,6 +31,7 @@ User.init(
         msg: "Username already in use, please choose another",
       },
     },
+    //change to Hours Left, then give user 2 at creation.
 
     freeHoursUsed: {
       type: DataTypes.INTEGER,
@@ -111,11 +112,6 @@ User.init(
     },
 
     country: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-
-    continent: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -213,7 +209,7 @@ User.init(
       allowNull: false,
       defaultValue: {
         type: SubscriptionPlans.Free,
-        hasPaid: false,
+        hasPaid: true,
         dateOfPayment: new Date(),
         dateOfExpiry: null,
         autoRenew: false

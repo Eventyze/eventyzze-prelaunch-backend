@@ -21,5 +21,6 @@ router.post('/google-auth', validations_1.joiValidators.inputValidator(validatio
 router.post('/facebook-auth', validations_1.joiValidators.inputValidator(validations_1.joiValidators.facebookAuthSchema), controllers_1.userAuthController.facebookAuth);
 router.post('/request-password-reset', validations_1.joiValidators.inputValidator(validations_1.joiValidators.requestPasswordResetSchema), controllers_1.userAuthController.requestPasswordReset);
 router.post('/reset-password', validations_1.joiValidators.inputValidator(validations_1.joiValidators.resetPasswordSchema), controllers_1.userAuthController.resetPassword);
+router.get('/username-confirm', controllers_1.userController.confirmUserName);
 router.post('/logout', controllers_1.userAuthController.userLogout);
 exports.default = router;

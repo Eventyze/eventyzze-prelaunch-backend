@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const usersModel_1 = __importDefault(require("./users/usersModel"));
 const eventsModel_1 = __importDefault(require("./events/eventsModel"));
-const walletModel_1 = __importDefault(require("./wallets/walletModel"));
 const otpModel_1 = __importDefault(require("./otp/otpModel"));
 const followersModel_1 = __importDefault(require("./followers/followersModel"));
 const followingsModel_1 = __importDefault(require("./followings/followingsModel"));
@@ -41,8 +40,8 @@ attendanceModel_1.default.belongsTo(eventsModel_1.default, { foreignKey: "eventI
 usersModel_1.default.hasMany(otpModel_1.default, { foreignKey: "userId", as: "userOtp" });
 otpModel_1.default.belongsTo(usersModel_1.default, { foreignKey: "userId", as: "otpUser" });
 // User ↔ Wallet
-usersModel_1.default.hasOne(walletModel_1.default, { foreignKey: "ownerId", as: "wallet" });
-walletModel_1.default.belongsTo(usersModel_1.default, { foreignKey: "ownerId", as: "walletUser" });
+// User.hasOne(Wallet, { foreignKey: "ownerId", as: "wallet" });
+// Wallet.belongsTo(User, { foreignKey: "ownerId", as: "walletUser" });
 // User ↔ Followers
 usersModel_1.default.hasOne(followersModel_1.default, { foreignKey: "userId", as: "userFollowers" });
 followersModel_1.default.belongsTo(usersModel_1.default, { foreignKey: "userId", as: "followerUser" });
@@ -52,6 +51,6 @@ followingsModel_1.default.belongsTo(usersModel_1.default, { foreignKey: "userId"
 // User ↔ Events
 usersModel_1.default.hasMany(eventsModel_1.default, { foreignKey: "userId", as: "userEvents" });
 eventsModel_1.default.belongsTo(usersModel_1.default, { foreignKey: "userId", as: "events" });
-// Events ↔ Wallet
-eventsModel_1.default.hasOne(walletModel_1.default, { foreignKey: "ownerId", as: "eventWallet" });
-walletModel_1.default.belongsTo(eventsModel_1.default, { foreignKey: "ownerId", as: "walletEvent" });
+// // Events ↔ Wallet
+// Events.hasOne(Wallet, { foreignKey: "ownerId", as: "eventWallet" });
+// Wallet.belongsTo(Events, { foreignKey: "ownerId", as: "walletEvent" });

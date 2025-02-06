@@ -75,10 +75,6 @@ const generalAuthFunction = async (request, response, next) => {
                 message: `Login Again, Invalid Token: ${error.message}`,
             });
         }
-        const filter = { id: verifiedUser.id };
-        const projection = ['isVerified'];
-        const userDetails = await repositories_1.userRepositories.userRepositories.getOne(filter, projection);
-        console.log('auth1', userDetails);
         request.user = verifiedUser;
         return next();
     }

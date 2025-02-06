@@ -1,4 +1,4 @@
-interface VideoConfig {
+export interface VideoConfig {
     codec: string;
     width: number;
     height: number;
@@ -6,7 +6,7 @@ interface VideoConfig {
     export_file: boolean
 }
 
-interface WaterMark {
+export interface WaterMark {
     url: string;
     size: {
         width: number;
@@ -15,13 +15,13 @@ interface WaterMark {
     position: string;
 }
 
-interface AudioConfig {
+export interface AudioConfig {
     codec: string;
     channel: string;
     export_file: boolean;
 }
 
-interface StorageConfig {
+export interface StorageConfig {
     type: string;
     access_key: string;
     secret: string;
@@ -36,7 +36,7 @@ interface StorageConfig {
     private_key: string;
 }
 
-interface RecordingConfig {
+export interface RecordingConfig {
     max_seconds: number;
     file_name_prefix: string;
     video_config: VideoConfig;
@@ -50,7 +50,7 @@ interface RecordingConfig {
     // }
 }
 
-interface PlainumHostDyteMeetingData {
+export interface PlainumHostDyteMeetingData {
     title: string;
     preferred_region: string;
     record_on_start: boolean;
@@ -59,7 +59,7 @@ interface PlainumHostDyteMeetingData {
     persist_chat: boolean;
 }
 
-interface GoldHostDyteMeetingData {
+export interface GoldHostDyteMeetingData {
     title: string;
     preferred_region: string;
     record_on_start: boolean;
@@ -68,7 +68,7 @@ interface GoldHostDyteMeetingData {
     persist_chat: boolean;
 }
 
-interface SilverHostDyteMeetingData {
+export interface SilverHostDyteMeetingData {
     title: string;
     preferred_region: string;
     record_on_start: boolean;
@@ -76,7 +76,7 @@ interface SilverHostDyteMeetingData {
     persist_chat: boolean;
 }
 
-interface BronzeHostDyteMeetingData {
+export interface BronzeHostDyteMeetingData {
     title: string;
     preferred_region: string;
     record_on_start: boolean;
@@ -84,3 +84,15 @@ interface BronzeHostDyteMeetingData {
     persist_chat: boolean;
 }
 
+export interface ParticipantDetails {
+    name: string,
+    picture: string,
+    preset_name: PresetNames,
+    custom_participant_id: string
+}
+
+
+export enum PresetNames {
+    HOST = "livestream_host",
+    PARTICIPANT = "livestream_viewer"
+}

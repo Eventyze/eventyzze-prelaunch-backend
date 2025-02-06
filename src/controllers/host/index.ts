@@ -25,6 +25,12 @@ const hostCreatesEvent = async (
 
   const userId = request.user.id;
 
+  const imageUrl = request?.files?.['image'] ? request.files['image'][0].path : null;
+  const videoUrl = request?.files?.['video'] ? request.files['video'][0].path : null;
+
+  request.body.coverImage = imageUrl;
+  request.body.videoUrl = videoUrl;
+
   const newEvent = await hostServices.hostCreatesEventService(userId, request.body);
 
   return responseUtilities.responseHandler(

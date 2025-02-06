@@ -47,8 +47,8 @@ User.hasMany(Otp, { foreignKey: "userId", as: "userOtp" });
 Otp.belongsTo(User, { foreignKey: "userId", as: "otpUser" });
 
 // User ↔ Wallet
-User.hasOne(Wallet, { foreignKey: "ownerId", as: "wallet" });
-Wallet.belongsTo(User, { foreignKey: "ownerId", as: "walletUser" });
+// User.hasOne(Wallet, { foreignKey: "ownerId", as: "wallet" });
+// Wallet.belongsTo(User, { foreignKey: "ownerId", as: "walletUser" });
 
 // User ↔ Followers
 User.hasOne(Followers, { foreignKey: "userId", as: "userFollowers" });
@@ -62,6 +62,6 @@ Followings.belongsTo(User, { foreignKey: "userId", as: "followingUser" });
 User.hasMany(Events, { foreignKey: "userId", as: "userEvents" });
 Events.belongsTo(User, { foreignKey: "userId", as: "events" });
 
-// Events ↔ Wallet
-Events.hasOne(Wallet, { foreignKey: "ownerId", as: "eventWallet" });
-Wallet.belongsTo(Events, { foreignKey: "ownerId", as: "walletEvent" });
+// // Events ↔ Wallet
+// Events.hasOne(Wallet, { foreignKey: "ownerId", as: "eventWallet" });
+// Wallet.belongsTo(Events, { foreignKey: "ownerId", as: "walletEvent" });
