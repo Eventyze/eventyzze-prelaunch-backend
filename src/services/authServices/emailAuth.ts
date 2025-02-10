@@ -2,7 +2,7 @@ import { ResponseDetails } from "../../types/generalTypes";
 import validator from "validator";
 import { generalHelpers } from "../../helpers";
 import { mailUtilities, errorUtilities } from "../../utilities";
-import { Roles, UserAttributes } from "../../types/modelTypes";
+import { Roles, SignupProvider, UserAttributes } from "../../types/modelTypes";
 import { v4 } from "uuid";
 import otpDatabaseHelpers from "../../repositories/otpRepository/otpRepository.repositories";
 import { Transaction } from "sequelize";
@@ -83,6 +83,7 @@ const userRegisterWithEmailService = errorUtilities.withErrorHandling(
       email,
       password: await generalHelpers.hashPassword(password.trim()),
       eventyzzeId: "",
+      provider: SignupProvider.Email,
       otp: {
         otp,
         otpId,
@@ -261,10 +262,14 @@ const userLogin = errorUtilities.withErrorHandling(
     const existingUser: any = await userRepositories.userRepositories.getOne(
       filter,
       projection
-    );
+    ) as unknown as UserAttributes;
 
     if (!existingUser) {
       throw errorUtilities.createError(EmailAuthResponses.NOT_FOUND, 404);
+    }
+
+    if (existingUser.provider !== SignupProvider.Email) {
+      throw errorUtilities.createError(EmailAuthResponses.WRONG_LOGIN_METHOD, 400)
     }
 
     if (!existingUser.isVerified) {
@@ -309,8 +314,6 @@ const userLogin = errorUtilities.withErrorHandling(
       "30d"
     );
 
-    console.log('toks', accessToken)
-
     let mailMessage = "";
     let mailSubject = "";
 
@@ -344,15 +347,11 @@ const userLogin = errorUtilities.withErrorHandling(
 
     await userRepositories.userRepositories.updateOne({email}, {refreshToken:refreshToken})
 
-    console.log('existingUser', existingUser)
-
     const newExistingUser:any =
       await userRepositories.userRepositories.getOne(filter);
 
     
     const userWithoutPassword = await userRepositories.userRepositories.extractUserDetails(newExistingUser)
-
-    console.log('checkUser', userWithoutPassword)
 
     await mailUtilities.sendMail(existingUser.email, mailMessage, mailSubject);
 

@@ -5,6 +5,7 @@ import {
   Roles,
   SubscriptionPlans,
   AccountStatus,
+  SignupProvider
 } from "../../types/modelTypes";
 import { DatabaseSubscriptionPlans } from "../subscriptionPlan/subscriptionPlanModel";
 
@@ -90,15 +91,32 @@ User.init(
 
     password: {
       type: DataTypes.TEXT,
+      allowNull: true,
+    },
+
+    provider: {
+      type: DataTypes.ENUM(...Object.values(SignupProvider)),
       allowNull: false,
-      validate: {
-        notNull: {
-          msg: "Password is required",
-        },
-        notEmpty: {
-          msg: "Password is required",
-        },
-      },
+    },
+
+    oauthId: {
+      type: DataTypes.STRING, // Google/Facebook user ID
+      allowNull: true,
+    },
+
+    oauthAccessToken: {
+      type: DataTypes.TEXT, // Long-term token
+      allowNull: true,
+    },
+
+    oauthRefreshToken: {
+      type: DataTypes.TEXT, // Only for Google
+      allowNull: true,
+    },
+
+    oauthTokenExpiresAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
 
     bio: {

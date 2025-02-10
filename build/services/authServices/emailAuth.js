@@ -61,6 +61,7 @@ const userRegisterWithEmailService = utilities_1.errorUtilities.withErrorHandlin
         email,
         password: await helpers_1.generalHelpers.hashPassword(password.trim()),
         eventyzzeId: "",
+        provider: modelTypes_1.SignupProvider.Email,
         otp: {
             otp,
             otpId,
@@ -171,6 +172,9 @@ const userLogin = utilities_1.errorUtilities.withErrorHandling(async (loginPaylo
     if (!existingUser) {
         throw utilities_1.errorUtilities.createError(responses_1.EmailAuthResponses.NOT_FOUND, 404);
     }
+    if (existingUser.provider !== modelTypes_1.SignupProvider.Email) {
+        throw utilities_1.errorUtilities.createError(responses_1.EmailAuthResponses.WRONG_LOGIN_METHOD, 400);
+    }
     if (!existingUser.isVerified) {
         responseHandler.statusCode = 403;
         responseHandler.message = responses_1.EmailAuthResponses.UNVERIFIED_ACCOUNT;
@@ -194,7 +198,6 @@ const userLogin = utilities_1.errorUtilities.withErrorHandling(async (loginPaylo
     };
     const accessToken = await helpers_1.generalHelpers.generateTokens(tokenPayload, "2h");
     const refreshToken = await helpers_1.generalHelpers.generateTokens(tokenPayload, "30d");
-    console.log('toks', accessToken);
     let mailMessage = "";
     let mailSubject = "";
     const dateDetails = helpers_1.generalHelpers.dateFormatter(new Date());
@@ -216,10 +219,8 @@ const userLogin = utilities_1.errorUtilities.withErrorHandling(async (loginPaylo
     existingUser.refreshToken = refreshToken;
     existingUser.activeDeviceId = deviceId;
     await repositories_1.userRepositories.userRepositories.updateOne({ email }, { refreshToken: refreshToken });
-    console.log('existingUser', existingUser);
     const newExistingUser = await repositories_1.userRepositories.userRepositories.getOne(filter);
     const userWithoutPassword = await repositories_1.userRepositories.userRepositories.extractUserDetails(newExistingUser);
-    console.log('checkUser', userWithoutPassword);
     await utilities_1.mailUtilities.sendMail(existingUser.email, mailMessage, mailSubject);
     responseHandler.statusCode = 200;
     responseHandler.message =

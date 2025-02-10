@@ -5,6 +5,7 @@ export enum EmailAuthResponses {
     ALREADY_EXISTING_USER = "User already exists with this email",
     SUCCESFUL_CREATION = "User created successfully, an OTP has been sent to your mail for email verification",
     NOT_FOUND = "User not found or email does not exist. Please register",
+    WRONG_LOGIN_METHOD = "It looks like you signed up with Google or Facebook. Please use that login method.",
     INVALID_OTP = "Invalid OTP. Please try again or request a new OTP",
     EXPIRED_OTP = "OTP expired. Please request a new OTP",
     VERIFIED_ACCOUNT = "Account verified successfully",

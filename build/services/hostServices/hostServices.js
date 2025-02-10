@@ -11,6 +11,7 @@ const uuid_1 = require("uuid");
 const helpers_1 = require("../../helpers");
 const databaseTransactions_middleware_1 = __importDefault(require("../../middlewares/databaseTransactions.middleware"));
 const services_1 = require("../../services");
+const response_utilities_1 = __importDefault(require("../../utilities/responseHandlers/response.utilities"));
 const getAllHostsService = utilities_1.errorUtilities.withErrorHandling(async () => {
     const responseHandler = {
         statusCode: 0,
@@ -38,19 +39,9 @@ const getAllHostsService = utilities_1.errorUtilities.withErrorHandling(async ()
         ['createdAt', 'DESC'],
     ]);
     if (!hosts) {
-        responseHandler.statusCode = 404;
-        responseHandler.message = "Unable to get hosts";
-        responseHandler.data = {
-            hosts,
-        };
-        return responseHandler;
+        throw utilities_1.errorUtilities.createError('Unable to get hosts', 404);
     }
-    responseHandler.statusCode = 200;
-    responseHandler.message = "Hosts fetched successfully";
-    responseHandler.data = {
-        hosts,
-    };
-    return responseHandler;
+    return response_utilities_1.default.handleServicesResponse(200, "Hosts fetched successfully", hosts);
 });
 const hostCreatesEventService = utilities_1.errorUtilities.withErrorHandling(async (userId, eventCreationDetails) => {
     const responseHandler = {
@@ -131,6 +122,7 @@ const hostCreatesEventService = utilities_1.errorUtilities.withErrorHandling(asy
         currency: eventCreationDetails.currency,
         coverImage: eventCreationDetails.coverImage,
         videoUrl: eventCreationDetails.videoUrl,
+        ownerName: user.userName,
         dyteDetails: {
             meetingId: dyteMeetingData.data.id,
             meetingTitle: dyteMeetingData.data.title,

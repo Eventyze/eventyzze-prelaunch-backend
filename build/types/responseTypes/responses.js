@@ -7,6 +7,7 @@ var EmailAuthResponses;
     EmailAuthResponses["ALREADY_EXISTING_USER"] = "User already exists with this email";
     EmailAuthResponses["SUCCESFUL_CREATION"] = "User created successfully, an OTP has been sent to your mail for email verification";
     EmailAuthResponses["NOT_FOUND"] = "User not found or email does not exist. Please register";
+    EmailAuthResponses["WRONG_LOGIN_METHOD"] = "It looks like you signed up with Google or Facebook. Please use that login method.";
     EmailAuthResponses["INVALID_OTP"] = "Invalid OTP. Please try again or request a new OTP";
     EmailAuthResponses["EXPIRED_OTP"] = "OTP expired. Please request a new OTP";
     EmailAuthResponses["VERIFIED_ACCOUNT"] = "Account verified successfully";

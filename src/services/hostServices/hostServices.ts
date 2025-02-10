@@ -27,7 +27,7 @@ import { Transaction } from "sequelize";
 import { dyteHelpers, generalHelpers } from "../../helpers";
 import performTransaction from "../../middlewares/databaseTransactions.middleware";
 import { dyteServices } from "../../services";
-import { BronzeHostDyteMeetingData } from "../../types/dyteTypes";
+import handleServicesResponse from "../../utilities/responseHandlers/response.utilities";
 
 const getAllHostsService = errorUtilities.withErrorHandling(
   async (): Promise<Record<string, any>> => {
@@ -65,20 +65,13 @@ const getAllHostsService = errorUtilities.withErrorHandling(
     );
 
     if (!hosts) {
-      responseHandler.statusCode = 404;
-      responseHandler.message = "Unable to get hosts";
-      responseHandler.data = {
-        hosts,
-      };
-      return responseHandler;
+      throw errorUtilities.createError('Unable to get hosts', 404)
     }
-
-    responseHandler.statusCode = 200;
-    responseHandler.message = "Hosts fetched successfully";
-    responseHandler.data = {
-      hosts,
-    };
-    return responseHandler;
+    return handleServicesResponse.handleServicesResponse(
+      200,
+      "Hosts fetched successfully",
+      hosts
+    );
   }
 );
 
@@ -198,6 +191,7 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
       currency: eventCreationDetails.currency,
       coverImage: eventCreationDetails.coverImage,
       videoUrl: eventCreationDetails.videoUrl,
+      ownerName: user.userName,
       dyteDetails: {
         meetingId: dyteMeetingData.data.id,
         meetingTitle: dyteMeetingData.data.title,

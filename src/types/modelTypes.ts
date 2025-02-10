@@ -17,7 +17,7 @@ export interface UserAttributes {
     email: string;
     isInitialHostingOfferExhausted: boolean;
     password:string;
-    role: string;
+    role: Roles;
     refreshToken: string;
     numberOfEventsHosted: number;
     numberOfEventsAttended: number;
@@ -26,8 +26,8 @@ export interface UserAttributes {
     country: string;
     state: string;
     address: string;
-    subscriptionPlan: string;
-    accountStatus: string;
+    subscriptionPlan: SubscriptionPlans;
+    accountStatus: AccountStatus;
     interests: any;
     isVerified: boolean;
     isBlacklisted: boolean;
@@ -40,6 +40,17 @@ export interface UserAttributes {
     subscriptionDetails: subscriptionDetails;
     freeHoursLeft:number
     newlyUpgraded: boolean;
+    provider: SignupProvider;
+    oauthId:string;
+    oauthAccessToken:string;
+    oauthRefreshToken:string;
+    oauthTokenExpiresAt:string;
+}
+
+export enum SignupProvider {
+    Email = "email",
+    Google = "google",
+    Facebook = "facebook"
 }
 
 export enum Roles {
@@ -138,6 +149,7 @@ export interface EventAttributes {
     videoUrl: string;
     category: string[]
     isRecorded: boolean;
+    ownerName: string;
 }
 
 export interface DyteDetials {

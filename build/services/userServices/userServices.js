@@ -59,7 +59,7 @@ const userProfileUpdateService = utilities_1.errorUtilities.withErrorHandling(as
         updateDetails.address = body.address.trim();
     }
     const newUser = await repositories_1.userRepositories.userRepositories.updateOne({ id }, updateDetails);
-    return response_utilities_1.default.handleServicesResponse(200, 'Profile updated successfully', newUser);
+    return response_utilities_1.default.handleServicesResponse(200, "Profile updated successfully", newUser);
 });
 const updateUserImageService = utilities_1.errorUtilities.withErrorHandling(async (imageUrl, id) => {
     if (!imageUrl) {
@@ -68,13 +68,15 @@ const updateUserImageService = utilities_1.errorUtilities.withErrorHandling(asyn
     const newMovie = await repositories_1.userRepositories.userRepositories.updateOne({
         id,
     }, {
-        userImage: imageUrl
+        userImage: imageUrl,
     });
-    return response_utilities_1.default.handleServicesResponse(200, 'Movie image changed successfully', newMovie);
+    return response_utilities_1.default.handleServicesResponse(200, "Movie image changed successfully", newMovie);
 });
 const userfirstimeProfileUpdateService = utilities_1.errorUtilities.withErrorHandling(async (profilePayload) => {
-    let { id, userName, bio, interests, phone, fullName, state, country, address, stateCode, countryCode } = profilePayload;
-    const user = await repositories_1.userRepositories.userRepositories.getOne({ id });
+    let { id, userName, bio, interests, phone, fullName, state, country, address, stateCode, countryCode, } = profilePayload;
+    const user = (await repositories_1.userRepositories.userRepositories.getOne({
+        id,
+    }));
     if (!user) {
         throw utilities_1.errorUtilities.createError("User not found", 404);
     }
@@ -91,14 +93,14 @@ const userfirstimeProfileUpdateService = utilities_1.errorUtilities.withErrorHan
     profilePayload.eventyzzeId = userEventyzzeId;
     profilePayload.isInitialProfileSetupDone = true;
     const newUser = await repositories_1.userRepositories.userRepositories.updateOne({ id }, profilePayload);
-    return response_utilities_1.default.handleServicesResponse(200, 'Profile updated successfully', newUser);
+    return response_utilities_1.default.handleServicesResponse(200, "Profile updated successfully", newUser);
 });
 const confirmUserNameService = utilities_1.errorUtilities.withErrorHandling(async (userName) => {
     const confirmUserName = await repositories_1.userRepositories.userRepositories.getOne({ userName }, ["userName"]);
     if (confirmUserName) {
         throw utilities_1.errorUtilities.createError("Username unavailable, please choose another username", 400);
     }
-    return response_utilities_1.default.handleServicesResponse(200, 'Username Available');
+    return response_utilities_1.default.handleServicesResponse(200, "Username Available");
 });
 const userSwitchesToHostService = utilities_1.errorUtilities.withErrorHandling(async (userPayload) => {
     const responseHandler = {
@@ -111,29 +113,56 @@ const userSwitchesToHostService = utilities_1.errorUtilities.withErrorHandling(a
     return responseHandler;
 });
 const getAllLiveEventsService = utilities_1.errorUtilities.withErrorHandling(async () => {
-    const events = await repositories_1.eventRepositories.eventRepositories.getMany({ isLive: true });
+    const projection = [
+        'id',
+        'eventTitle',
+        'ownerName',
+        'coverImage',
+        'isLive'
+    ];
+    const events = await repositories_1.eventRepositories.eventRepositories.getMany({
+        isLive: true,
+    }, projection);
     if (!events) {
         throw utilities_1.errorUtilities.createError("Unable to fetch Events", 404);
     }
-    return response_utilities_1.default.handleServicesResponse(200, 'Live Events fetched successfully', events);
+    return response_utilities_1.default.handleServicesResponse(200, "Live Events fetched successfully", events);
 });
 const getNewEvents = utilities_1.errorUtilities.withErrorHandling(async () => {
-    const events = await repositories_1.eventRepositories.eventRepositories.getMany({}, null, {}, [["createdAt", "DESC"]]);
+    const projection = [
+        'id',
+        'eventTitle',
+        'ownerName',
+        'coverImage',
+        'isLive'
+    ];
+    const events = await repositories_1.eventRepositories.eventRepositories.getMany({}, projection, {}, [["createdAt", "DESC"]]);
     if (!events) {
         throw utilities_1.errorUtilities.createError("Unable to fetch Events", 404);
     }
     return response_utilities_1.default.handleServicesResponse(200, "New Events fetched successfully", events);
 });
 const getDiscoverEvents = utilities_1.errorUtilities.withErrorHandling(async (userId) => {
-    const user = await repositories_1.userRepositories.userRepositories.getOne({ id: userId }, ["interests", "id"]);
-    const events = await repositories_1.eventRepositories.eventRepositories.getMany({ category: { [sequelize_1.Op.overlap]: user.interests } });
+    const user = (await repositories_1.userRepositories.userRepositories.getOne({ id: userId }, ["interests", "id"]));
+    const events = await repositories_1.eventRepositories.eventRepositories.getMany({
+        category: { [sequelize_1.Op.overlap]: user.interests },
+    });
     if (!events) {
         throw utilities_1.errorUtilities.createError("Unable to fetch Events", 404);
     }
     return response_utilities_1.default.handleServicesResponse(200, "Events fetched successfully", events);
 });
 const getRecordedEvents = utilities_1.errorUtilities.withErrorHandling(async () => {
-    const events = await repositories_1.eventRepositories.eventRepositories.getMany({ isRecorded: true });
+    const projection = [
+        'id',
+        'eventTitle',
+        'ownerName',
+        'coverImage',
+        'isLive'
+    ];
+    const events = await repositories_1.eventRepositories.eventRepositories.getMany({
+        isRecorded: true,
+    }, projection);
     if (!events) {
         throw utilities_1.errorUtilities.createError("Unable to fetch Events", 404);
     }
@@ -146,8 +175,15 @@ const getAllEvents = utilities_1.errorUtilities.withErrorHandling(async () => {
     }
     return response_utilities_1.default.handleServicesResponse(200, "All Events fetched successfully", events);
 });
-const getTrendingEvents = utilities_1.errorUtilities.withErrorHandling(async (req, res) => {
-    const events = await repositories_1.eventRepositories.eventRepositories.getMany({}, null, {}, [["noOfLikes", "DESC"]]);
+const getTrendingEvents = utilities_1.errorUtilities.withErrorHandling(async () => {
+    const projection = [
+        'id',
+        'eventTitle',
+        'ownerName',
+        'coverImage',
+        'isLive'
+    ];
+    const events = await repositories_1.eventRepositories.eventRepositories.getMany({}, projection, {}, [["noOfLikes", "DESC"]]);
     if (!events)
         return response_utilities_1.default.handleServicesResponse(404, "Unable to fetch events", null);
     return response_utilities_1.default.handleServicesResponse(200, "Trending Events fetched successfully", events);
@@ -163,5 +199,5 @@ exports.default = {
     getRecordedEvents,
     getAllEvents,
     confirmUserNameService,
-    getTrendingEvents
+    getTrendingEvents,
 };

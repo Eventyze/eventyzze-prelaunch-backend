@@ -30,6 +30,10 @@ Events.init({
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
     },
+    ownerName: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: false,
+    },
     description: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,

@@ -1,6 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AccountStatus = exports.SubscriptionPlans = exports.Roles = void 0;
+exports.AccountStatus = exports.SubscriptionPlans = exports.Roles = exports.SignupProvider = void 0;
+var SignupProvider;
+(function (SignupProvider) {
+    SignupProvider["Email"] = "email";
+    SignupProvider["Google"] = "google";
+    SignupProvider["Facebook"] = "facebook";
+})(SignupProvider || (exports.SignupProvider = SignupProvider = {}));
 var Roles;
 (function (Roles) {
     Roles["User"] = "User";

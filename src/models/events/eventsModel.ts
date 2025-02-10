@@ -29,6 +29,11 @@ Events.init(
           onUpdate: "CASCADE",
       },
 
+      ownerName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+
       description: {
         type: DataTypes.STRING,
         allowNull: false,
