@@ -9,6 +9,6 @@ const controllers_1 = require("../../controllers");
 const utilities_1 = require("../../utilities");
 const router = express_1.default.Router();
 //Shop Routes
-router.get('/get-all-hosts', controllers_1.hostController.allHosts);
+router.get('/get-all-hosts', controllers_1.hostController.allHosts); //add auth function later
 router.post('/create-event', authorization_middleware_1.generalAuthFunction, utilities_1.cloudinaryUpload, controllers_1.hostController.hostCreatesEvent);
 exports.default = router;

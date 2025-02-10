@@ -50,7 +50,7 @@ const eventRepositories = {
         attributes: projection,
         include: include ? [
           { model: Wallet, as: 'wallet' },
-        ] : []
+        ] : [],
       });
       return event;
     } catch (error: any) {
@@ -59,12 +59,13 @@ const eventRepositories = {
   },
   
 
-  getMany: async (filter: any, projection: any = null, options: any = null) => {
+  getMany: async (filter: any, projection: any = null, options: any = null, order?:any) => {
     try {
       const events = await Event.findAll({
         where: filter,
         attributes: projection ? projection : null,
         ...options,
+        order: order ? order : []
       });
       return events;
     } catch (error: any) {

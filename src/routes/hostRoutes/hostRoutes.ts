@@ -9,7 +9,7 @@ const router = express.Router();
 
 
 //Shop Routes
-router.get('/get-all-hosts', hostController.allHosts)
+router.get('/get-all-hosts', hostController.allHosts) //add auth function later
 router.post('/create-event', generalAuthFunction, cloudinaryUpload, hostController.hostCreatesEvent)
 
 export default router;

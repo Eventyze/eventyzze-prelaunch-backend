@@ -4,19 +4,12 @@ import validator from "validator";
 import { JwtPayload } from "jsonwebtoken";
 import { eventRepositories, userRepositories } from "../../repositories";
 import { UserAttributes } from "../../types/modelTypes";
-import countries from 'i18n-iso-countries';
 import { generalHelpers } from "../../helpers";
-const iso3166 = require('iso3166-2-db');
+import { Op } from "sequelize";
+import handleServicesResponse from '../../utilities/responseHandlers/response.utilities'
 
 const userProfileUpdateService = errorUtilities.withErrorHandling(
   async (profilePayload: Record<string, any>): Promise<Record<string, any>> => {
-    const responseHandler: ResponseDetails = {
-      statusCode: 0,
-      message: "",
-      data: {},
-      details: {},
-      info: {},
-    };
 
     const { body } = profilePayload;
 
@@ -100,21 +93,12 @@ const userProfileUpdateService = errorUtilities.withErrorHandling(
       updateDetails
     );
 
-    responseHandler.statusCode = 200;
-    responseHandler.message = "Profile updated successfully";
-    responseHandler.data = {
-      user: newUser,
-    };
-    return responseHandler;
+    return handleServicesResponse.handleServicesResponse(200, 'Profile updated successfully', newUser)
   }
 );
 
 const updateUserImageService = errorUtilities.withErrorHandling(
   async (imageUrl: string, id:string): Promise<any> => {
-    const responseHandler: ResponseDetails = {
-      statusCode: 0,
-      message: "",
-    };
 
       if (!imageUrl) {
         throw errorUtilities.createError("Select an Image", 400);
@@ -128,25 +112,12 @@ const updateUserImageService = errorUtilities.withErrorHandling(
         userImage: imageUrl
       }
     );
-
-    responseHandler.statusCode = 200;
-    responseHandler.message = "Movie image changed successfully";
-    responseHandler.data = {
-      mmovie: newMovie,
-    };
-    return responseHandler;
+    return handleServicesResponse.handleServicesResponse(200, 'Movie image changed successfully', newMovie)
   }
 );
 
 const userfirstimeProfileUpdateService = errorUtilities.withErrorHandling(
   async (profilePayload: Record<string, any>): Promise<Record<string, any>> => {
-    const responseHandler: ResponseDetails = {
-      statusCode: 0,
-      message: "",
-      data: {},
-      details: {},
-      info: {},
-    };
 
     let {
       id,
@@ -188,24 +159,12 @@ const userfirstimeProfileUpdateService = errorUtilities.withErrorHandling(
       profilePayload
     );
 
-    responseHandler.statusCode = 200;
-    responseHandler.message = "Profile updated successfully";
-    responseHandler.data = {
-      user: newUser,
-    };
-    return responseHandler;
+    return handleServicesResponse.handleServicesResponse(200, 'Profile updated successfully', newUser)
   }
 );
 
 const confirmUserNameService = errorUtilities.withErrorHandling(
   async (userName: string) => {
-    const responseHandler: ResponseDetails = {
-      statusCode: 0,
-      message: "",
-      data: {},
-      details: {},
-      info: {},
-    };
 
     const confirmUserName = await userRepositories.userRepositories.getOne(
       { userName },
@@ -218,10 +177,7 @@ const confirmUserNameService = errorUtilities.withErrorHandling(
         400
       );
     }
-
-    responseHandler.message = "Username Available"
-    responseHandler.statusCode = 200;
-    return responseHandler;
+    return handleServicesResponse.handleServicesResponse(200, 'Username Available');
 
   })
 
@@ -241,63 +197,73 @@ const userSwitchesToHostService = errorUtilities.withErrorHandling(
 
 const getAllLiveEventsService = errorUtilities.withErrorHandling(
   async (): Promise<Record<string, any>> => {
-    const responseHandler: ResponseDetails = {
-      statusCode: 0,
-      message: "",
-      data: {},
-      details: {},
-      info: {},
-    };
 
     const events: any = await eventRepositories.eventRepositories.getMany({isLive:true})
 
-    if(!events || events.length === 0){
-        responseHandler.statusCode = 404;
-        responseHandler.message = "No events found";
-        responseHandler.data = {
-            events
-        }
-        return responseHandler;
+    if(!events){
+      throw errorUtilities.createError(
+        "Unable to fetch Events",
+        404
+      );
     }
-
-    responseHandler.statusCode = 200;
-    responseHandler.message = "Events fetched successfully";
-    responseHandler.data = {
-      events
-    };
-    return responseHandler;
+    return handleServicesResponse.handleServicesResponse(200, 'Live Events fetched successfully', events)
   }
 );
 
-const getAllEventsService = errorUtilities.withErrorHandling(
-  async (): Promise<Record<string, any>> => {
-    const responseHandler: ResponseDetails = {
-      statusCode: 0,
-      message: "",
-      data: {},
-      details: {},
-      info: {},
-    };
+const getNewEvents = errorUtilities.withErrorHandling(async () => {
+  const events = await eventRepositories.eventRepositories.getMany({}, null, {}, [["createdAt", "DESC"]]);
+  if(!events){
+      throw errorUtilities.createError(
+        "Unable to fetch Events",
+        404
+      );
+    }
+  return handleServicesResponse.handleServicesResponse(200, "New Events fetched successfully", events);
+});
 
-    const events: any = await eventRepositories.eventRepositories.getMany({})
+const getDiscoverEvents = errorUtilities.withErrorHandling(async (userId:string) => {
 
-    if(!events || events.length === 0){
-        responseHandler.statusCode = 404;
-        responseHandler.message = "No events found";
-        responseHandler.data = {
-            events
-        }
-        return responseHandler;
+  const user = await userRepositories.userRepositories.getOne({ id: userId }, ["interests", "id"]) as unknown as UserAttributes;
+
+  const events = await eventRepositories.eventRepositories.getMany({ category: { [Op.overlap]: user.interests } });
+  if(!events){
+      throw errorUtilities.createError(
+        "Unable to fetch Events",
+        404
+      );
     }
 
-    responseHandler.statusCode = 200;
-    responseHandler.message = "Events fetched successfully";
-    responseHandler.data = {
-      events
-    };
-    return responseHandler;
-  }
-);
+  return handleServicesResponse.handleServicesResponse(200, "Events fetched successfully", events);
+});
+
+const getRecordedEvents = errorUtilities.withErrorHandling(async () => {
+  const events = await eventRepositories.eventRepositories.getMany({ isRecorded: true });
+  if(!events){
+      throw errorUtilities.createError(
+        "Unable to fetch Events",
+        404
+      );
+    }
+  return handleServicesResponse.handleServicesResponse(200, "Recorded Events fetched successfully", events);
+});
+
+const getAllEvents = errorUtilities.withErrorHandling(async () => {
+  const events = await eventRepositories.eventRepositories.getMany({});
+  if(!events){
+      throw errorUtilities.createError(
+        "Unable to fetch Events",
+        404
+      );
+    }
+  return handleServicesResponse.handleServicesResponse(200, "All Events fetched successfully", events);
+});
+
+const getTrendingEvents = errorUtilities.withErrorHandling(async (req: Request, res: Response) => {
+  const events = await eventRepositories.eventRepositories.getMany({}, null, {}, [["noOfLikes", "DESC"]]);
+  if (!events) return handleServicesResponse.handleServicesResponse(404, "Unable to fetch events", null);
+  return handleServicesResponse.handleServicesResponse(200, "Trending Events fetched successfully", events);
+});
+
 
 
 export default {
@@ -306,6 +272,10 @@ export default {
   userSwitchesToHostService,
   userfirstimeProfileUpdateService,
   getAllLiveEventsService,
-  getAllEventsService, 
-  confirmUserNameService
+  getNewEvents,
+  getDiscoverEvents,
+  getRecordedEvents,
+  getAllEvents,
+  confirmUserNameService,
+  getTrendingEvents
 };

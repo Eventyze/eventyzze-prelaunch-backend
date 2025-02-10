@@ -23,9 +23,39 @@ const confirmUserName = async (request, response) => {
     const userNameConfirmation = await services_1.userServices.confirmUserNameService(userName);
     return utilities_1.responseUtilities.responseHandler(response, userNameConfirmation.message, userNameConfirmation.statusCode);
 };
+const liveEvents = async (request, response) => {
+    const liveEvents = await services_1.userServices.getAllLiveEventsService();
+    return utilities_1.responseUtilities.responseHandler(response, liveEvents.message, liveEvents.statusCode, liveEvents.data);
+};
+const newEvents = async (request, response) => {
+    const newEvents = await services_1.userServices.getNewEvents();
+    return utilities_1.responseUtilities.responseHandler(response, newEvents.message, newEvents.statusCode, newEvents.data);
+};
+const eventsOfInterests = async (request, response) => {
+    const interestEvents = await services_1.userServices.getDiscoverEvents();
+    return utilities_1.responseUtilities.responseHandler(response, interestEvents.message, interestEvents.statusCode, interestEvents.data);
+};
+const recordedEvents = async (request, response) => {
+    const recordedEvents = await services_1.userServices.getRecordedEvents();
+    return utilities_1.responseUtilities.responseHandler(response, recordedEvents.message, recordedEvents.statusCode, recordedEvents.data);
+};
+const allEvents = async (request, response) => {
+    const allEvents = await services_1.userServices.getAllEvents();
+    return utilities_1.responseUtilities.responseHandler(response, allEvents.message, allEvents.statusCode, allEvents.data);
+};
+const trendingEvents = async (request, response) => {
+    const trendingEvents = await services_1.userServices.getTrendingEvents();
+    return utilities_1.responseUtilities.responseHandler(response, trendingEvents.message, trendingEvents.statusCode, trendingEvents.data);
+};
 exports.default = {
     updateUserProfile,
     changeUserImage,
     firstTimeProfileUpdate,
-    confirmUserName
+    confirmUserName,
+    liveEvents,
+    newEvents,
+    eventsOfInterests,
+    recordedEvents,
+    allEvents,
+    trendingEvents
 };

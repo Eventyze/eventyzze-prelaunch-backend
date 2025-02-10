@@ -53,7 +53,7 @@ const eventRepositories = {
                 attributes: projection,
                 include: include ? [
                     { model: walletModel_1.default, as: 'wallet' },
-                ] : []
+                ] : [],
             });
             return event;
         }
@@ -61,12 +61,13 @@ const eventRepositories = {
             throw new Error(`Error fetching Event: ${error.message}`);
         }
     },
-    getMany: async (filter, projection = null, options = null) => {
+    getMany: async (filter, projection = null, options = null, order) => {
         try {
             const events = await eventsModel_1.default.findAll({
                 where: filter,
                 attributes: projection ? projection : null,
                 ...options,
+                order: order ? order : []
             });
             return events;
         }

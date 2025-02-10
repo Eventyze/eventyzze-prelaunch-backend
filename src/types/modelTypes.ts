@@ -38,7 +38,8 @@ export interface UserAttributes {
     subScriptionId: string;
     activeDeviceId: any;
     subscriptionDetails: subscriptionDetails;
-    freeHoursUsed:number
+    freeHoursLeft:number
+    newlyUpgraded: boolean;
 }
 
 export enum Roles {
@@ -135,6 +136,8 @@ export interface EventAttributes {
     isHosted: boolean;
     dyteDetails: DyteDetials;
     videoUrl: string;
+    category: string[]
+    isRecorded: boolean;
 }
 
 export interface DyteDetials {

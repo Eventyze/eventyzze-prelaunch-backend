@@ -95,6 +95,11 @@ Events.init(
         defaultValue: false
       },
 
+      category: {
+        type: DataTypes.ARRAY(DataTypes.STRING),
+        allowNull: false,
+      },
+
       cost: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -113,7 +118,13 @@ Events.init(
       videoUrl: {
         type: DataTypes.STRING,
         allowNull: false
-      }
+      },
+
+      isRecorded: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+      },
 
   },
   {

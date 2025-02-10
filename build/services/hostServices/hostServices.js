@@ -27,18 +27,26 @@ const getAllHostsService = utilities_1.errorUtilities.withErrorHandling(async ()
         "numberOfEventsAttended",
         "userImage",
         "noOfFollowers",
+        "newlyUpgraded",
+        "phone",
+        "eventyzzeId",
+        "email",
+        "role"
     ];
-    const hosts = await repositories_1.userRepositories.userRepositories.getMany({ role: modelTypes_1.Roles.Host }, projection);
-    if (!hosts || hosts.length === 0) {
+    const hosts = await repositories_1.userRepositories.userRepositories.getMany({ role: modelTypes_1.Roles.Host }, projection, [
+        ['newlyUpgraded', 'DESC'],
+        ['createdAt', 'DESC'],
+    ]);
+    if (!hosts) {
         responseHandler.statusCode = 404;
-        responseHandler.message = "No hosts found";
+        responseHandler.message = "Unable to get hosts";
         responseHandler.data = {
             hosts,
         };
         return responseHandler;
     }
     responseHandler.statusCode = 200;
-    responseHandler.message = "Profile updated successfully";
+    responseHandler.message = "Hosts fetched successfully";
     responseHandler.data = {
         hosts,
     };

@@ -74,12 +74,13 @@ const userRepositories = {
   },
   
 
-  getMany: async (filter: any, projection?: any, options?: any) => {
+  getMany: async (filter: any, projection?: any, options?: any, order?:any) => {
     try {
       const users = await User.findAll({
         where: filter,
         attributes: projection,
         ...options,
+        order
       });
       return users;
     } catch (error: any) {

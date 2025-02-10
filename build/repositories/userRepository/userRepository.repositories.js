@@ -74,12 +74,13 @@ const userRepositories = {
             throw new Error(`Error fetching User: ${error.message}`);
         }
     },
-    getMany: async (filter, projection, options) => {
+    getMany: async (filter, projection, options, order) => {
         try {
             const users = await usersModel_1.default.findAll({
                 where: filter,
                 attributes: projection,
                 ...options,
+                order
             });
             return users;
         }

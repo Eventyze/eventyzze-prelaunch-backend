@@ -33,9 +33,9 @@ User.init(
     },
     //change to Hours Left, then give user 2 at creation.
 
-    freeHoursUsed: {
+    freeHoursLeft: {
       type: DataTypes.INTEGER,
-      defaultValue: 0,
+      defaultValue: 4,
     },
 
     eventyzzeId: {
@@ -190,6 +190,12 @@ User.init(
           }
         },
       },
+    },
+
+    newlyUpgraded: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false
     },
 
     subScriptionId: {

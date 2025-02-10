@@ -84,6 +84,10 @@ Events.init({
         allowNull: false,
         defaultValue: false
     },
+    category: {
+        type: sequelize_1.DataTypes.ARRAY(sequelize_1.DataTypes.STRING),
+        allowNull: false,
+    },
     cost: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
@@ -99,7 +103,12 @@ Events.init({
     videoUrl: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false
-    }
+    },
+    isRecorded: {
+        type: sequelize_1.DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    },
 }, {
     sequelize: database_1.database,
     tableName: "Events",

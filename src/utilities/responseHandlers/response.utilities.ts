@@ -1,4 +1,6 @@
 import { Response } from "express";
+import { ResponseDetails } from "../../types/generalTypes";
+import { errorUtilities } from "../../utilities";
 
 /**
  * Response Handler:
@@ -30,6 +32,21 @@ const responseHandler = (
   });
 };
 
+
+
+const handleServicesResponse = (statusCode: number, message: string, data?: any) => {
+  const responseHandler: ResponseDetails = {
+    statusCode: 0,
+    message: "",
+    data: {},
+  };
+  responseHandler.message = message;
+  responseHandler.statusCode = statusCode;
+  responseHandler.data = data
+  return responseHandler
+};
+
 export default {
   responseHandler,
+  handleServicesResponse
 };

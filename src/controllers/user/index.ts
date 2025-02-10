@@ -75,9 +75,108 @@ const confirmUserName = async (
     userNameConfirmation.statusCode
   );
 }
+
+const liveEvents = async (
+  request: JwtPayload,
+  response: Response
+): Promise<any> => {
+
+  const liveEvents = await userServices.getAllLiveEventsService()
+
+  return responseUtilities.responseHandler(
+    response,
+    liveEvents.message,
+    liveEvents.statusCode,
+    liveEvents.data
+  );
+}
+
+const newEvents = async (
+  request: JwtPayload,
+  response: Response
+): Promise<any> => {
+
+  const newEvents = await userServices.getNewEvents()
+
+  return responseUtilities.responseHandler(
+    response,
+    newEvents.message,
+    newEvents.statusCode,
+    newEvents.data
+  );
+}
+
+const eventsOfInterests = async (
+  request: JwtPayload,
+  response: Response
+): Promise<any> => {
+
+  const interestEvents = await userServices.getDiscoverEvents()
+
+  return responseUtilities.responseHandler(
+    response,
+    interestEvents.message,
+    interestEvents.statusCode,
+    interestEvents.data
+  );
+}
+
+const recordedEvents = async (
+  request: JwtPayload,
+  response: Response
+): Promise<any> => {
+
+  const recordedEvents = await userServices.getRecordedEvents()
+
+  return responseUtilities.responseHandler(
+    response,
+    recordedEvents.message,
+    recordedEvents.statusCode,
+    recordedEvents.data
+  );
+}
+
+const allEvents = async (
+  request: JwtPayload,
+  response: Response
+): Promise<any> => {
+
+  const allEvents = await userServices.getAllEvents()
+
+  return responseUtilities.responseHandler(
+    response,
+    allEvents.message,
+    allEvents.statusCode,
+    allEvents.data
+  );
+}
+
+const trendingEvents = async (
+  request: JwtPayload,
+  response: Response
+): Promise<any> => {
+
+  const trendingEvents = await userServices.getTrendingEvents()
+
+  return responseUtilities.responseHandler(
+    response,
+    trendingEvents.message,
+    trendingEvents.statusCode,
+    trendingEvents.data
+  );
+}
+
+
+
 export default {
     updateUserProfile,
     changeUserImage,
     firstTimeProfileUpdate,
-    confirmUserName
+    confirmUserName,
+    liveEvents,
+    newEvents,
+    eventsOfInterests,
+    recordedEvents,
+    allEvents,
+    trendingEvents
 }

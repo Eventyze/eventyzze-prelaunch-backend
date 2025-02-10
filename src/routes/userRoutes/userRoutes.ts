@@ -30,4 +30,16 @@ router.get('/username-confirm', userController.confirmUserName)
 
 router.post('/logout', userAuthController.userLogout)
 
+router.get('/live-events', userController.liveEvents)
+
+router.get('/all-events', userController.allEvents)
+
+router.get("/trending-events", userController.trendingEvents);
+
+router.get("/new-events", userController.newEvents);
+
+router.get("/discover-events", userController.eventsOfInterests);
+
+router.get("/recorded-events", userController.recordedEvents);
+
 export default router;

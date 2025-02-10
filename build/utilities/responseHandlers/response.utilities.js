@@ -20,6 +20,18 @@ const responseHandler = (response, message, statusCode, data, details, info) => 
         info
     });
 };
+const handleServicesResponse = (statusCode, message, data) => {
+    const responseHandler = {
+        statusCode: 0,
+        message: "",
+        data: {},
+    };
+    responseHandler.message = message;
+    responseHandler.statusCode = statusCode;
+    responseHandler.data = data;
+    return responseHandler;
+};
 exports.default = {
     responseHandler,
+    handleServicesResponse
 };

@@ -23,4 +23,10 @@ router.post('/request-password-reset', validations_1.joiValidators.inputValidato
 router.post('/reset-password', validations_1.joiValidators.inputValidator(validations_1.joiValidators.resetPasswordSchema), controllers_1.userAuthController.resetPassword);
 router.get('/username-confirm', controllers_1.userController.confirmUserName);
 router.post('/logout', controllers_1.userAuthController.userLogout);
+router.get('/live-events', controllers_1.userController.liveEvents);
+router.get('/all-events', controllers_1.userController.allEvents);
+router.get("/trending-events", controllers_1.userController.trendingEvents);
+router.get("/new-events", controllers_1.userController.newEvents);
+router.get("/discover-events", controllers_1.userController.eventsOfInterests);
+router.get("/recorded-events", controllers_1.userController.recordedEvents);
 exports.default = router;

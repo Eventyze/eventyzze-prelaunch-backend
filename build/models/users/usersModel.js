@@ -26,9 +26,9 @@ User.init({
         },
     },
     //change to Hours Left, then give user 2 at creation.
-    freeHoursUsed: {
+    freeHoursLeft: {
         type: sequelize_1.DataTypes.INTEGER,
-        defaultValue: 0,
+        defaultValue: 4,
     },
     eventyzzeId: {
         type: sequelize_1.DataTypes.STRING,
@@ -159,6 +159,11 @@ User.init({
                 }
             },
         },
+    },
+    newlyUpgraded: {
+        type: sequelize_1.DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
     },
     subScriptionId: {
         type: sequelize_1.DataTypes.UUID,
