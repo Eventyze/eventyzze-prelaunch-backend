@@ -192,6 +192,7 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
       coverImage: eventCreationDetails.coverImage,
       videoUrl: eventCreationDetails.videoUrl,
       ownerName: user.userName,
+      category: eventCreationDetails.category,
       dyteDetails: {
         meetingId: dyteMeetingData.data.id,
         meetingTitle: dyteMeetingData.data.title,

@@ -123,6 +123,7 @@ const hostCreatesEventService = utilities_1.errorUtilities.withErrorHandling(asy
         coverImage: eventCreationDetails.coverImage,
         videoUrl: eventCreationDetails.videoUrl,
         ownerName: user.userName,
+        category: eventCreationDetails.category,
         dyteDetails: {
             meetingId: dyteMeetingData.data.id,
             meetingTitle: dyteMeetingData.data.title,

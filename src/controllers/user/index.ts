@@ -29,10 +29,18 @@ const firstTimeProfileUpdate = async (
 
     const { id } = request.user
 
+    console.log('buddie', request.body)
+
 
   const newUpdate: any = await userServices.userfirstimeProfileUpdateService(
     { ...request.body, id }
   );
+
+  if(newUpdate.statusCode === 200){
+    response
+      .header("x-access-token", newUpdate.data.accessToken)
+      .header("x-refresh-token", newUpdate.data.refreshToken);
+    }
 
   return responseUtilities.responseHandler(
     response,

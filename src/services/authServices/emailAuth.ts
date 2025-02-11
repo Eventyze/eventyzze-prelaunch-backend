@@ -255,6 +255,7 @@ const userLogin = errorUtilities.withErrorHandling(
       "refreshToken",
       "isInitialProfileSetupDone",
       "fullName",
+      "provider",
     ];
 
     const filter = { email: email.trim() };
@@ -345,7 +346,7 @@ const userLogin = errorUtilities.withErrorHandling(
 
     existingUser.activeDeviceId = deviceId;
 
-    await userRepositories.userRepositories.updateOne({email}, {refreshToken:refreshToken})
+    await userRepositories.userRepositories.updateOne({email}, {refreshToken:refreshToken, activeDeviceId:deviceId})
 
     const newExistingUser:any =
       await userRepositories.userRepositories.getOne(filter);

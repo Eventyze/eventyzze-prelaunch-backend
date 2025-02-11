@@ -73,7 +73,7 @@ const updateUserImageService = utilities_1.errorUtilities.withErrorHandling(asyn
     return response_utilities_1.default.handleServicesResponse(200, "Movie image changed successfully", newMovie);
 });
 const userfirstimeProfileUpdateService = utilities_1.errorUtilities.withErrorHandling(async (profilePayload) => {
-    let { id, userName, bio, interests, phone, fullName, state, country, address, stateCode, countryCode, } = profilePayload;
+    let { id, userName, bio, interests, phone, fullName, state, country, address, stateCode, countryCode, deviceId, } = profilePayload;
     const user = (await repositories_1.userRepositories.userRepositories.getOne({
         id,
     }));
@@ -90,10 +90,33 @@ const userfirstimeProfileUpdateService = utilities_1.errorUtilities.withErrorHan
     catch (error) {
         throw utilities_1.errorUtilities.createError("Failed to generate unique identifier, please try again", 500);
     }
+    const tokenPayload = {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+    };
+    const accessToken = await helpers_1.generalHelpers.generateTokens(tokenPayload, "2h");
+    const refreshToken = await helpers_1.generalHelpers.generateTokens(tokenPayload, "30d");
+    if (!user.refreshToken || !user.isInitialProfileSetupDone) {
+        let mailMessage = "";
+        let mailSubject = "";
+        mailMessage = `Welcome to Eventyzze ${user.fullName ? user.fullName : ""}! <br /><br />
+
+          We're excited to have you on board. Eventyzze is your go-to platform for discovering, organizing, and sharing amazing events. Whether you're attending or hosting, we're here to make your experience seamless and enjoyable. <br /> <br />
+
+          If you have any questions or need help getting started, feel free to reach out to our support team. We're always here to assist you. <br /> <br />
+
+          Let's make some unforgettable moments together!`;
+        mailSubject = `Welcome to Eventyzze ${user.fullName ? user.fullName : ""}`;
+        await utilities_1.mailUtilities.sendMail(user.email, mailMessage, mailSubject);
+    }
     profilePayload.eventyzzeId = userEventyzzeId;
     profilePayload.isInitialProfileSetupDone = true;
+    profilePayload.refreshToken = refreshToken;
+    profilePayload.activeDeviceId = deviceId;
     const newUser = await repositories_1.userRepositories.userRepositories.updateOne({ id }, profilePayload);
-    return response_utilities_1.default.handleServicesResponse(200, "Profile updated successfully", newUser);
+    const userData = { user: newUser, accessToken, refreshToken };
+    return response_utilities_1.default.handleServicesResponse(200, "Profile updated successfully", userData);
 });
 const confirmUserNameService = utilities_1.errorUtilities.withErrorHandling(async (userName) => {
     const confirmUserName = await repositories_1.userRepositories.userRepositories.getOne({ userName }, ["userName"]);

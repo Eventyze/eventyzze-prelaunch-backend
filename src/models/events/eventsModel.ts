@@ -101,7 +101,7 @@ Events.init(
       },
 
       category: {
-        type: DataTypes.ARRAY(DataTypes.STRING),
+        type: DataTypes.STRING,
         allowNull: false,
       },
 

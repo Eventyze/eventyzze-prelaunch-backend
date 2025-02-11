@@ -9,7 +9,13 @@ const updateUserProfile = async (request, response) => {
 };
 const firstTimeProfileUpdate = async (request, response) => {
     const { id } = request.user;
+    console.log('buddie', request.body);
     const newUpdate = await services_1.userServices.userfirstimeProfileUpdateService({ ...request.body, id });
+    if (newUpdate.statusCode === 200) {
+        response
+            .header("x-access-token", newUpdate.data.accessToken)
+            .header("x-refresh-token", newUpdate.data.refreshToken);
+    }
     return utilities_1.responseUtilities.responseHandler(response, newUpdate.message, newUpdate.statusCode, newUpdate.data);
 };
 const changeUserImage = async (request, response) => {

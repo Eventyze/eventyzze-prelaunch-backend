@@ -1,5 +1,5 @@
 import { ResponseDetails } from "../../types/generalTypes";
-import { errorUtilities } from "../../utilities";
+import { errorUtilities, mailUtilities } from "../../utilities";
 import validator from "validator";
 import { JwtPayload } from "jsonwebtoken";
 import { eventRepositories, userRepositories } from "../../repositories";
@@ -136,6 +136,7 @@ const userfirstimeProfileUpdateService = errorUtilities.withErrorHandling(
       address,
       stateCode,
       countryCode,
+      deviceId,
     } = profilePayload;
 
     const user = (await userRepositories.userRepositories.getOne({
@@ -163,19 +164,58 @@ const userfirstimeProfileUpdateService = errorUtilities.withErrorHandling(
       );
     }
 
+
+    const tokenPayload = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    const accessToken = await generalHelpers.generateTokens(tokenPayload, "2h");
+    const refreshToken = await generalHelpers.generateTokens(
+      tokenPayload,
+      "30d"
+    );
+
+    
+    if (!user.refreshToken || !user.isInitialProfileSetupDone) {
+      let mailMessage = "";
+      let mailSubject = "";
+      mailMessage = `Welcome to Eventyzze ${
+        user.fullName ? user.fullName : ""
+      }! <br /><br />
+
+          We're excited to have you on board. Eventyzze is your go-to platform for discovering, organizing, and sharing amazing events. Whether you're attending or hosting, we're here to make your experience seamless and enjoyable. <br /> <br />
+
+          If you have any questions or need help getting started, feel free to reach out to our support team. We're always here to assist you. <br /> <br />
+
+          Let's make some unforgettable moments together!`;
+
+      mailSubject = `Welcome to Eventyzze ${
+        user.fullName ? user.fullName : ""
+      }`;
+      await mailUtilities.sendMail(user.email, mailMessage, mailSubject);
+    }
+
     profilePayload.eventyzzeId = userEventyzzeId;
 
     profilePayload.isInitialProfileSetupDone = true;
+
+    profilePayload.refreshToken = refreshToken;
+
+    profilePayload.activeDeviceId = deviceId;
 
     const newUser = await userRepositories.userRepositories.updateOne(
       { id },
       profilePayload
     );
 
+    const userData = { user: newUser, accessToken, refreshToken }
+
     return handleServicesResponse.handleServicesResponse(
       200,
       "Profile updated successfully",
-      newUser
+      userData
     );
   }
 );
@@ -267,6 +307,7 @@ const getNewEvents = errorUtilities.withErrorHandling(async () => {
 
 const getDiscoverEvents = errorUtilities.withErrorHandling(
   async (userId: string) => {
+
     const user = (await userRepositories.userRepositories.getOne(
       { id: userId },
       ["interests", "id"]
@@ -275,6 +316,7 @@ const getDiscoverEvents = errorUtilities.withErrorHandling(
     const events = await eventRepositories.eventRepositories.getMany({
       category: { [Op.overlap]: user.interests },
     });
+
     if (!events) {
       throw errorUtilities.createError("Unable to fetch Events", 404);
     }
@@ -284,6 +326,7 @@ const getDiscoverEvents = errorUtilities.withErrorHandling(
       "Events fetched successfully",
       events
     );
+
   }
 );
 
@@ -300,31 +343,38 @@ const getRecordedEvents = errorUtilities.withErrorHandling(async () => {
   const events = await eventRepositories.eventRepositories.getMany({
     isRecorded: true,
   }, projection);
+
   if (!events) {
     throw errorUtilities.createError("Unable to fetch Events", 404);
   }
+
   return handleServicesResponse.handleServicesResponse(
     200,
     "Recorded Events fetched successfully",
     events
   );
+
 });
 
 const getAllEvents = errorUtilities.withErrorHandling(async () => {
 
   const events = await eventRepositories.eventRepositories.getMany({});
+
   if (!events) {
     throw errorUtilities.createError("Unable to fetch Events", 404);
   }
+
   return handleServicesResponse.handleServicesResponse(
     200,
     "All Events fetched successfully",
     events
   );
+
 });
 
 const getTrendingEvents = errorUtilities.withErrorHandling(
   async () => {
+
     const projection = [
       'id',
       'eventTitle',
@@ -332,23 +382,27 @@ const getTrendingEvents = errorUtilities.withErrorHandling(
       'coverImage',
       'isLive'
     ]
+
     const events = await eventRepositories.eventRepositories.getMany(
       {},
       projection,
       {},
       [["noOfLikes", "DESC"]]
     );
+
     if (!events)
       return handleServicesResponse.handleServicesResponse(
         404,
         "Unable to fetch events",
         null
       );
+
     return handleServicesResponse.handleServicesResponse(
       200,
       "Trending Events fetched successfully",
       events
     );
+    
   }
 );
 

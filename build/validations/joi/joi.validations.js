@@ -99,6 +99,7 @@ const firstTimeProfileUpdateSchema = joi_1.default.object({
     countryCode: joi_1.default.string().trim().required().messages({
         'string.base': 'country is required'
     }),
+    deviceId: joi_1.default.string().trim().optional()
 });
 const createEventSchema = joi_1.default.object({
     eventTitle: joi_1.default.string().trim().required().messages({

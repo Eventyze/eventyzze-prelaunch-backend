@@ -89,7 +89,7 @@ Events.init({
         defaultValue: false
     },
     category: {
-        type: sequelize_1.DataTypes.ARRAY(sequelize_1.DataTypes.STRING),
+        type: sequelize_1.DataTypes.STRING,
         allowNull: false,
     },
     cost: {

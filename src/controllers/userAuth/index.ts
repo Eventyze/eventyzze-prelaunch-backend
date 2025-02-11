@@ -10,8 +10,6 @@ const userRegisterWithEmail = async (
   request: Request,
   response: Response
 ): Promise<any> => {
-
-  console.log('body', request.body)
   
   const newUser: any = await userEmailAuthService.userRegisterWithEmailService(
     request.body
@@ -35,7 +33,11 @@ const userVerifiesOtp = async (
    request.body
   );
 
-  console.log('bod', request.body)
+  if(newUser.statusCode === 200){
+    response
+      .header("x-access-token", newUser.data.accessToken)
+      .header("x-refresh-token", newUser.data.refreshToken);
+    }
 
   return responseUtilities.responseHandler(
     response,

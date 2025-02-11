@@ -106,6 +106,7 @@ const firstTimeProfileUpdateSchema = Joi.object({
   countryCode: Joi.string().trim().required().messages({
   'string.base': 'country is required'
 }),
+  deviceId: Joi.string().trim().optional()
 });
 
 

@@ -166,6 +166,7 @@ const userLogin = utilities_1.errorUtilities.withErrorHandling(async (loginPaylo
         "refreshToken",
         "isInitialProfileSetupDone",
         "fullName",
+        "provider",
     ];
     const filter = { email: email.trim() };
     const existingUser = await repositories_1.userRepositories.userRepositories.getOne(filter, projection);
@@ -218,7 +219,7 @@ const userLogin = utilities_1.errorUtilities.withErrorHandling(async (loginPaylo
     }
     existingUser.refreshToken = refreshToken;
     existingUser.activeDeviceId = deviceId;
-    await repositories_1.userRepositories.userRepositories.updateOne({ email }, { refreshToken: refreshToken });
+    await repositories_1.userRepositories.userRepositories.updateOne({ email }, { refreshToken: refreshToken, activeDeviceId: deviceId });
     const newExistingUser = await repositories_1.userRepositories.userRepositories.getOne(filter);
     const userWithoutPassword = await repositories_1.userRepositories.userRepositories.extractUserDetails(newExistingUser);
     await utilities_1.mailUtilities.sendMail(existingUser.email, mailMessage, mailSubject);

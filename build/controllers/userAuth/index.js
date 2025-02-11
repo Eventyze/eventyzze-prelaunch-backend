@@ -6,13 +6,16 @@ const services_2 = require("../../services");
 const services_3 = require("../../services");
 const services_4 = require("../../services");
 const userRegisterWithEmail = async (request, response) => {
-    console.log('body', request.body);
     const newUser = await services_1.userEmailAuthService.userRegisterWithEmailService(request.body);
     return utilities_1.responseUtilities.responseHandler(response, newUser.message, newUser.statusCode, newUser.data);
 };
 const userVerifiesOtp = async (request, response) => {
     const newUser = await services_1.userEmailAuthService.userVerifiesOtp(request.body);
-    console.log('bod', request.body);
+    if (newUser.statusCode === 200) {
+        response
+            .header("x-access-token", newUser.data.accessToken)
+            .header("x-refresh-token", newUser.data.refreshToken);
+    }
     return utilities_1.responseUtilities.responseHandler(response, newUser.message, newUser.statusCode, newUser.data);
 };
 const userLoginWithEmail = async (request, response) => {
