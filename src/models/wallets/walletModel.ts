@@ -1,9 +1,11 @@
 import { DataTypes, Model } from "sequelize";
 import { database } from "../../configurations/database";
 import {
+  Roles,
   WalletAttributes,
 } from "../../types/modelTypes";
 import User from "../users/usersModel";
+import Events from "../events/eventsModel";
 
 export class Wallet extends Model<WalletAttributes> {}
 
@@ -15,15 +17,17 @@ Wallet.init(
       allowNull: false,
     },
 
-    userId: {
+    ownerId: {
       type: DataTypes.UUID,
       allowNull: false,
-      references: {
-        model: User,
-        key: "id",
+    },
+
+    walletType: {
+      type: DataTypes.ENUM(...Object.values(Roles)),
+      allowNull: false,
+      validate: {
+        isIn: [Object.values(Roles)],
       },
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
     },
 
     totalBalance: {

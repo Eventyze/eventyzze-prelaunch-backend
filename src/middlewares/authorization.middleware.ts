@@ -100,12 +100,6 @@ export const generalAuthFunction = async (
       });
     }
 
-    const filter = { id: verifiedUser.id };
-
-    const projection = [ 'isVerified' ];
-
-    const userDetails:any = await userRepositories.userRepositories.getOne(filter, projection)
-
       request.user = verifiedUser;
 
       return next();
@@ -136,7 +130,7 @@ export function rolePermit(roles: string[]) {
     if (!isAuthorized) {
       return response.status(401).json({
         status: 'error',
-        message: 'User Not Permitted For Action',
+        message: 'Not Permitted For Action',
       });
     }
 

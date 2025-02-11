@@ -13,6 +13,11 @@ Events.init(
           allowNull: false,
       },
 
+      eventTitle: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+      },
+
       userId: {
           type: DataTypes.UUID,
           allowNull: false,
@@ -24,35 +29,80 @@ Events.init(
           onUpdate: "CASCADE",
       },
 
-      attendees: {
-          type: DataTypes.ARRAY(DataTypes.UUID),
-          allowNull: true,
-          defaultValue: [],
+      ownerName: {
+        type: DataTypes.STRING,
+        allowNull: false,
       },
 
       description: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false,
       },
 
       eventAd: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
       },
 
       date: {
-        type: DataTypes.DATE,
+        type: DataTypes.STRING,
         allowNull: false,
       },
 
       startTime: {
-        type: DataTypes.DATE,
+        type: DataTypes.STRING,
         allowNull: false,
       },
 
-      Duration: {
+      noOfLikes: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+      },
+
+      noOfDislikes: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+      },
+
+      duration: {
         type: DataTypes.STRING,
         allowNull: true,
+        defaultValue: null
+      },
+
+      endTime: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+
+      dyteDetails: {
+        type: DataTypes.JSON,
+        allowNull: true,
+      },
+
+      hostJoinTime: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null
+      },
+
+      isLive: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+      },
+
+      isHosted: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+      },
+
+      category: {
+        type: DataTypes.STRING,
+        allowNull: false,
       },
 
       cost: {
@@ -60,10 +110,26 @@ Events.init(
         allowNull: false,
       },
 
-      coverImage: {
+      currency: {
         type: DataTypes.STRING,
         allowNull: false,
-      }
+      },
+
+      coverImage: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+      },
+
+      videoUrl: {
+        type: DataTypes.TEXT,
+        allowNull: false
+      },
+
+      isRecorded: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+      },
 
   },
   {

@@ -10,8 +10,6 @@ const userRegisterWithEmail = async (
   request: Request,
   response: Response
 ): Promise<any> => {
-
-  console.log('body', request.body)
   
   const newUser: any = await userEmailAuthService.userRegisterWithEmailService(
     request.body
@@ -35,13 +33,16 @@ const userVerifiesOtp = async (
    request.body
   );
 
-  console.log('bod', request.body)
+  if(newUser.statusCode === 200){
+    response
+      .header("x-access-token", newUser.data.accessToken)
+      .header("x-refresh-token", newUser.data.refreshToken);
+    }
 
   return responseUtilities.responseHandler(
     response,
     newUser.message,
     newUser.statusCode,
-    newUser.details,
     newUser.data
   );
 };
@@ -77,7 +78,6 @@ const userResendsOtp = async (
     response,
     resentOtp.message,
     resentOtp.statusCode,
-    resentOtp.details,
     resentOtp.data,
   );
 };
@@ -138,7 +138,6 @@ const requestPasswordReset = async (
     response,
     resetResponse.message,
     resetResponse.statusCode,
-    resetResponse.details,
     resetResponse.data
   );
 };
@@ -153,8 +152,22 @@ const resetPassword = async (
     response,
     resetResponse.message,
     resetResponse.statusCode,
-    resetResponse.details,
     resetResponse.data
+  );
+};
+
+const userLogout = async (
+  request: Request,
+  response: Response
+): Promise<any> => {
+
+  const loggedOutUser: any = await userEmailAuthService.userLogoutService(request.body);
+  
+  return responseUtilities.responseHandler(
+    response,
+    loggedOutUser.message,
+    loggedOutUser.statusCode,
+    loggedOutUser.data,
   );
 };
 
@@ -167,4 +180,5 @@ export default {
   facebookAuth,
   requestPasswordReset,
   resetPassword,
+  userLogout
 };

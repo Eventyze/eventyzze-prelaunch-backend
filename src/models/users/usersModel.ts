@@ -5,6 +5,7 @@ import {
   Roles,
   SubscriptionPlans,
   AccountStatus,
+  SignupProvider
 } from "../../types/modelTypes";
 import { DatabaseSubscriptionPlans } from "../subscriptionPlan/subscriptionPlanModel";
 
@@ -32,6 +33,19 @@ User.init(
       },
     },
 
+//==//==//==//==//==//==//==>// change to Hours Left, then give user 2 at creation.
+
+    freeHoursLeft: {
+      type: DataTypes.INTEGER,
+      defaultValue: 4,
+    },
+
+    eventyzzeId: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true
+    },
+
     email: {
       type: DataTypes.TEXT,
       allowNull: false,
@@ -41,7 +55,12 @@ User.init(
       },
     },
 
-    isInitialProfileSetupDone: {
+    activeDeviceId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    isInitialHostingOfferExhausted: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
@@ -73,15 +92,32 @@ User.init(
 
     password: {
       type: DataTypes.TEXT,
+      allowNull: true,
+    },
+
+    provider: {
+      type: DataTypes.ENUM(...Object.values(SignupProvider)),
       allowNull: false,
-      validate: {
-        notNull: {
-          msg: "Password is required",
-        },
-        notEmpty: {
-          msg: "Password is required",
-        },
-      },
+    },
+
+    oauthId: {
+      type: DataTypes.STRING, // Google/Facebook user ID
+      allowNull: true,
+    },
+
+    oauthAccessToken: {
+      type: DataTypes.TEXT, // Long-term token
+      allowNull: true,
+    },
+
+    oauthRefreshToken: {
+      type: DataTypes.TEXT, // Only for Google
+      allowNull: true,
+    },
+
+    oauthTokenExpiresAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
 
     bio: {
@@ -99,12 +135,27 @@ User.init(
       allowNull: true,
     },
 
+    state: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    address: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
     isVerified: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
 
     isBlacklisted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+
+    isInitialProfileSetupDone: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
@@ -160,6 +211,12 @@ User.init(
       },
     },
 
+    newlyUpgraded: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false
+    },
+
     subScriptionId: {
       type: DataTypes.UUID,
       allowNull: true,
@@ -177,7 +234,7 @@ User.init(
       allowNull: false,
       defaultValue: {
         type: SubscriptionPlans.Free,
-        hasPaid: false,
+        hasPaid: true,
         dateOfPayment: new Date(),
         dateOfExpiry: null,
         autoRenew: false

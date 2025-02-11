@@ -74,12 +74,13 @@ const userRepositories = {
   },
   
 
-  getMany: async (filter: any, projection?: any, options?: any) => {
+  getMany: async (filter: any, projection?: any, options?: any, order?:any) => {
     try {
       const users = await User.findAll({
         where: filter,
         attributes: projection,
         ...options,
+        order
       });
       return users;
     } catch (error: any) {
@@ -110,8 +111,12 @@ const userRepositories = {
         noOfFollowers: userData.noOfFollowers,
         noOfFollowings: userData.noOfFollowings,
         id:userData.id,
+        isInitialHostingOfferExhausted:userData.isInitialHostingOfferExhausted,
+        eventyzzeId:userData.eventyzzeId,
         subscriptionDetails: userData.subscriptionDetails,
-        subScriptionId: userData.subScriptionId
+        subScriptionId: userData.subScriptionId,
+        state: userData.state,
+        address: userData.address,
       };
     } catch (error: any) {
       throw new Error(`Error fetching Users: ${error.message}`);

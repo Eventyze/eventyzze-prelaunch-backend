@@ -2,6 +2,9 @@ import brcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import otpGenerator from 'otp-generator';
 import { APP_SECRET } from '../../configurations/envKeys';
+import { userRepositories } from '../../repositories';
+import { v1 as uuidv1 } from 'uuid';
+import dayjs from 'dayjs';
 // import { ResponseDetails } from '../../types/utilities.types';
 // import { errorUtilities } from '../../utilities';
 // import { QueryParameters } from '../../types/helpers.types';
@@ -146,6 +149,63 @@ const dateFormatter = (dateString: Date) => {
   };
 
 
+  /**
+ * Generates a unique transaction reference.
+ * @returns {string} A unique transaction reference.
+ */
+const generateTransactionReference = (eventName:string): string => {
+  const eventInitials = eventName.split(" ").map((word) => word[0].match(/[a-z,A-Z]/) ? word[0]?.toUpperCase() : word[0]).join("");
+  return `EVENTYZZE-TXN-${eventInitials}-${Date.now()}`;
+};
+
+
+const generateUniqueUserEventyzzeId = async (
+  countryCode: string | any,
+  stateCode: string,
+  maxRetries: number = 5
+): Promise<string> => {
+  let attempt = 0;
+  
+  while (attempt < maxRetries) {
+    try {
+      const eventyzzeId = `EVNTZ-${countryCode}-${stateCode}-${uuidv1().substring(0, 6).toUpperCase()}`;
+
+      const existingUser = await userRepositories.userRepositories.getOne(
+        { eventyzzeId },
+        ['eventyzzeId']
+      );
+      
+      if (!existingUser) {
+        return eventyzzeId;
+      }
+      
+      attempt++;
+    } catch (error) {
+      attempt++;
+    }
+  }
+  
+  throw new Error('Failed to generate unique EventyzzeId after maximum retries');
+};
+
+//FOR THE FUTURE
+// const generateUniqueUserEventyzzeId = async (
+//   countryCode: string,
+//   stateCode: string
+// ): Promise<string> => {
+//   // Get current timestamp in milliseconds
+//   const timestamp = Date.now().toString(36);
+  
+//   // Get UUID v1 which includes timestamp + node identifier
+//   const uniqueSegment = uuidv1().substring(0, 6);
+  
+//   // Combine with a random number for extra uniqueness
+//   const randomNum = Math.floor(Math.random() * 1000).toString(36);
+  
+//   return `EVNTZ-${countryCode}-${stateCode}-${timestamp}${uniqueSegment}${randomNum}`;
+// };
+
+
   //This function is used to manage queries (request.query) for the application  
   // export const queryFilter = async (queryItem: QueryParameters) => {
 
@@ -203,6 +263,14 @@ const dateFormatter = (dateString: Date) => {
   // };
   
 
+  // Function to calculate endTime
+  const calculateEndTime = (startTime: string, duration: number, startDate:string) => {
+    const start = dayjs(`${startDate}T${startTime}`);
+    const end = start.add(duration, "minute");
+    return end.format("HH:mm");
+  };
+
+
 export default {
   hashPassword,
   validatePassword,
@@ -212,4 +280,7 @@ export default {
   // refreshUserToken,
   dateFormatter,
   // verifyRegistrationToken
+  generateTransactionReference,
+  generateUniqueUserEventyzzeId,
+  calculateEndTime
 };
