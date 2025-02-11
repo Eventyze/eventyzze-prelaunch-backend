@@ -144,7 +144,7 @@ const getAllLiveEventsService = utilities_1.errorUtilities.withErrorHandling(asy
         'isLive'
     ];
     const events = await repositories_1.eventRepositories.eventRepositories.getMany({
-        isLive: true,
+    // isLive: true,
     }, projection);
     if (!events) {
         throw utilities_1.errorUtilities.createError("Unable to fetch Events", 404);

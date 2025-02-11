@@ -265,7 +265,7 @@ const getAllLiveEventsService = errorUtilities.withErrorHandling(
       'isLive'
     ]
     const events: any = await eventRepositories.eventRepositories.getMany({
-      isLive: true,
+      // isLive: true,
     }, projection);
 
     if (!events) {

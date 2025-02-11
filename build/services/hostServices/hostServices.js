@@ -34,7 +34,9 @@ const getAllHostsService = utilities_1.errorUtilities.withErrorHandling(async ()
         "email",
         "role"
     ];
-    const hosts = await repositories_1.userRepositories.userRepositories.getMany({ role: modelTypes_1.Roles.Host }, projection, [
+    const hosts = await repositories_1.userRepositories.userRepositories.getMany({
+    // role: Roles.Host 
+    }, projection, [
         ['newlyUpgraded', 'DESC'],
         ['createdAt', 'DESC'],
     ]);
@@ -44,13 +46,6 @@ const getAllHostsService = utilities_1.errorUtilities.withErrorHandling(async ()
     return response_utilities_1.default.handleServicesResponse(200, "Hosts fetched successfully", hosts);
 });
 const hostCreatesEventService = utilities_1.errorUtilities.withErrorHandling(async (userId, eventCreationDetails) => {
-    const responseHandler = {
-        statusCode: 0,
-        message: "",
-        data: {},
-        details: {},
-        info: {},
-    };
     const projection = [
         "id",
         "role",
@@ -66,29 +61,18 @@ const hostCreatesEventService = utilities_1.errorUtilities.withErrorHandling(asy
     ];
     const user = (await repositories_1.userRepositories.userRepositories.getOne({ id: userId }, projection));
     if (!user) {
-        responseHandler.message = "User does not exist";
-        responseHandler.statusCode = 404;
-        return responseHandler;
+        throw utilities_1.errorUtilities.createError("User does not exist", 404);
     }
     if (user.role === modelTypes_1.Roles.User && user.isInitialHostingOfferExhausted) {
-        responseHandler.message =
-            "You cannot Host an event unless you upgrade to a host";
-        responseHandler.statusCode = 400;
-        return responseHandler;
+        throw utilities_1.errorUtilities.createError("You cannot Host an event unless you upgrade to a host", 400);
     }
     if (user.subscriptionPlan !== modelTypes_1.SubscriptionPlans.Free &&
         new Date(user.subscriptionDetails?.dateOfExpiry) >= new Date()) {
-        responseHandler.message =
-            "Plan has expired, please pay again or upgrade before you can host an event";
-        responseHandler.statusCode = 400;
-        return responseHandler;
+        throw utilities_1.errorUtilities.createError("Plan has expired, please pay again or upgrade before you can host an event", 400);
     }
     if (user.subscriptionDetails.type === modelTypes_1.SubscriptionPlans.Free &&
         user.subscriptionDetails.hasPaid === false) {
-        responseHandler.message =
-            "You cannot Host an event unless you upgrade to a host";
-        responseHandler.statusCode = 400;
-        return responseHandler;
+        throw utilities_1.errorUtilities.createError("You cannot Host an event unless you upgrade to a host", 400);
     }
     let userDyteData;
     if (user.subscriptionDetails.type === modelTypes_1.SubscriptionPlans.Free ||
@@ -111,8 +95,8 @@ const hostCreatesEventService = utilities_1.errorUtilities.withErrorHandling(asy
     const eventPayload = {
         id: eventId,
         userId: user.id,
-        eventTitle: eventCreationDetails.eventTitle,
-        description: eventCreationDetails.description,
+        eventTitle: eventCreationDetails.eventTitle.trim(),
+        description: eventCreationDetails.description.trim(),
         eventAd: eventCreationDetails.videoUrl,
         date: `${new Date(formattedDate)}`,
         startTime: eventCreationDetails.startTime,
@@ -147,10 +131,7 @@ const hostCreatesEventService = utilities_1.errorUtilities.withErrorHandling(asy
         id: eventId,
     });
     await utilities_1.mailUtilities.sendMail(user.email, `Hello ${user.userName}, your event has been created, please do not forget to join on the selected date`, "Eventyzze Event Creation");
-    responseHandler.statusCode = 201;
-    responseHandler.message = "Event created successfully";
-    responseHandler.data = newEvent;
-    return responseHandler;
+    return response_utilities_1.default.handleServicesResponse(201, "Event created successfully", newEvent);
 });
 const hostgetsAllTheirEventsService = utilities_1.errorUtilities.withErrorHandling(async (userId) => {
     const responseHandler = {

@@ -25,7 +25,7 @@ User.init({
             msg: "Username already in use, please choose another",
         },
     },
-    //change to Hours Left, then give user 2 at creation.
+    //==//==//==//==//==//==//==>// change to Hours Left, then give user 2 at creation.
     freeHoursLeft: {
         type: sequelize_1.DataTypes.INTEGER,
         defaultValue: 4,

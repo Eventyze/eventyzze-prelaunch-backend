@@ -55,7 +55,9 @@ const getAllHostsService = errorUtilities.withErrorHandling(
     ];
 
     const hosts: any = await userRepositories.userRepositories.getMany(
-      { role: Roles.Host },
+      { 
+        // role: Roles.Host 
+      },
       projection,
       [
         ['newlyUpgraded', 'DESC'],
@@ -80,13 +82,6 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
     userId: string,
     eventCreationDetails: Record<string, any>
   ): Promise<Record<string, any>> => {
-    const responseHandler: ResponseDetails = {
-      statusCode: 0,
-      message: "",
-      data: {},
-      details: {},
-      info: {},
-    };
 
     const projection = [
       "id",
@@ -108,36 +103,25 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
     )) as unknown as UserAttributes;
 
     if (!user) {
-      responseHandler.message = "User does not exist";
-      responseHandler.statusCode = 404;
-      return responseHandler;
+      throw errorUtilities.createError("User does not exist", 404);
     }
 
     if (user.role === Roles.User && user.isInitialHostingOfferExhausted) {
-      responseHandler.message =
-        "You cannot Host an event unless you upgrade to a host";
-      responseHandler.statusCode = 400;
-      return responseHandler;
+      throw errorUtilities.createError("You cannot Host an event unless you upgrade to a host", 400);
     }
 
     if (
       user.subscriptionPlan !== SubscriptionPlans.Free &&
       new Date(user.subscriptionDetails?.dateOfExpiry) >= new Date()
     ) {
-      responseHandler.message =
-        "Plan has expired, please pay again or upgrade before you can host an event";
-      responseHandler.statusCode = 400;
-      return responseHandler;
+      throw errorUtilities.createError("Plan has expired, please pay again or upgrade before you can host an event", 400);
     }
 
     if (
       user.subscriptionDetails.type === SubscriptionPlans.Free &&
       user.subscriptionDetails.hasPaid === false
     ) {
-      responseHandler.message =
-        "You cannot Host an event unless you upgrade to a host";
-      responseHandler.statusCode = 400;
-      return responseHandler;
+      throw errorUtilities.createError("You cannot Host an event unless you upgrade to a host", 400);
     }
 
     let userDyteData;
@@ -180,8 +164,8 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
     const eventPayload: Partial<EventAttributes> = {
       id: eventId,
       userId: user.id,
-      eventTitle: eventCreationDetails.eventTitle,
-      description: eventCreationDetails.description,
+      eventTitle: eventCreationDetails.eventTitle.trim(),
+      description: eventCreationDetails.description.trim(),
       eventAd: eventCreationDetails.videoUrl,
       date: `${new Date(formattedDate)}`,
       startTime: eventCreationDetails.startTime,
@@ -238,10 +222,11 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
       "Eventyzze Event Creation"
     );
 
-    responseHandler.statusCode = 201;
-    responseHandler.message = "Event created successfully";
-    responseHandler.data = newEvent;
-    return responseHandler;
+    return handleServicesResponse.handleServicesResponse(
+      201,
+      "Event created successfully",
+      newEvent
+    );
   }
 );
 

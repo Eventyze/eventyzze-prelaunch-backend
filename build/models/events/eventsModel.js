@@ -17,7 +17,7 @@ Events.init({
         allowNull: false,
     },
     eventTitle: {
-        type: sequelize_1.DataTypes.STRING,
+        type: sequelize_1.DataTypes.TEXT,
         allowNull: false,
     },
     userId: {
@@ -35,11 +35,11 @@ Events.init({
         allowNull: false,
     },
     description: {
-        type: sequelize_1.DataTypes.STRING,
+        type: sequelize_1.DataTypes.TEXT,
         allowNull: false,
     },
     eventAd: {
-        type: sequelize_1.DataTypes.STRING,
+        type: sequelize_1.DataTypes.TEXT,
         allowNull: true,
     },
     date: {
@@ -101,11 +101,11 @@ Events.init({
         allowNull: false,
     },
     coverImage: {
-        type: sequelize_1.DataTypes.STRING,
+        type: sequelize_1.DataTypes.TEXT,
         allowNull: false,
     },
     videoUrl: {
-        type: sequelize_1.DataTypes.STRING,
+        type: sequelize_1.DataTypes.TEXT,
         allowNull: false
     },
     isRecorded: {
