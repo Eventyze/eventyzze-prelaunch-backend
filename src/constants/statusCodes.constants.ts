@@ -1,4 +1,4 @@
-export enum StatusCodes {
+enum StatusCodes {
     OK = 200,
     CREATED = 201,
     NO_CONTENT = 204,
@@ -11,3 +11,8 @@ export enum StatusCodes {
     SERVICE_UNAVAILABLE = 503,
     GATEWAY_TIMEOUT = 504,
     }
+
+
+export default {
+    StatusCodes
+}

@@ -11,14 +11,10 @@ const uuid_1 = require("uuid");
 const databaseTransactions_middleware_1 = __importDefault(require("../../middlewares/databaseTransactions.middleware"));
 const repositories_1 = require("../../repositories");
 const emailAuthResponses_1 = require("../../types/responseTypes/emailAuthResponses");
+// import { StatusCodes } from '../../constants/statusCodes.constants';
+const constants_1 = require("../../constants");
+const response_utilities_1 = __importDefault(require("../../utilities/responseHandlers/response.utilities"));
 const userRegisterWithEmailService = utilities_1.errorUtilities.withErrorHandling(async (userPayload) => {
-    const responseHandler = {
-        statusCode: 0,
-        message: "",
-        data: {},
-        details: {},
-        info: {},
-    };
     let { email, password } = userPayload;
     email = email.trim();
     if (!validator_1.default.isEmail(email)) {
@@ -28,7 +24,7 @@ const userRegisterWithEmailService = utilities_1.errorUtilities.withErrorHandlin
         email,
     }));
     if (existingUser) {
-        throw utilities_1.errorUtilities.createError(emailAuthResponses_1.EmailAuthResponses.ALREADY_EXISTING_USER, 409);
+        throw utilities_1.errorUtilities.createError(emailAuthResponses_1.EmailAuthResponses.ALREADY_EXISTING_USER, constants_1.StatusCodes.StatusCodes.CONFLICT);
     }
     const userId = (0, uuid_1.v4)();
     const { otp, expiresAt } = await helpers_1.generalHelpers.generateOtp();
@@ -90,36 +86,26 @@ const userRegisterWithEmailService = utilities_1.errorUtilities.withErrorHandlin
     const user = await repositories_1.userRepositories.userRepositories.getOne({
         id: userId,
     });
-    await utilities_1.mailUtilities.sendMail(email, `Welcome to Eventyzze, your OTP is ${otp}, it expires in 5 minutes`, "Eventyzze OTP");
-    responseHandler.statusCode = 201;
-    responseHandler.message = emailAuthResponses_1.EmailAuthResponses.SUCCESFUL_CREATION;
-    responseHandler.data = user;
-    return responseHandler;
+    await utilities_1.mailUtilities.sendMail(email, constants_1.EmailConstants.generateAuthMailMessages().OTP(otp), constants_1.EmailConstants.EmailAuthMailSubjects.OTP);
+    return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.CREATED, emailAuthResponses_1.EmailAuthResponses.SUCCESFUL_CREATION, user);
 });
 const userVerifiesOtp = utilities_1.errorUtilities.withErrorHandling(async (userPayload) => {
-    const responseHandler = {
-        statusCode: 0,
-        message: "",
-        data: {},
-        details: {},
-        info: {},
-    };
     const { otp, email } = userPayload;
-    const projection = ["otp", "id", "role", "email"];
+    const projection = [constants_1.DatabaseConstants.DatabaseProjection.OTP, constants_1.DatabaseConstants.DatabaseProjection.ID, constants_1.DatabaseConstants.DatabaseProjection.ROLE, constants_1.DatabaseConstants.DatabaseProjection.EMAIL];
     const user = await repositories_1.userRepositories.userRepositories.getOne({ email: email.trim() }, projection);
     if (!user) {
-        throw utilities_1.errorUtilities.createError(emailAuthResponses_1.EmailAuthResponses.NOT_FOUND, 404);
+        throw utilities_1.errorUtilities.createError(emailAuthResponses_1.EmailAuthResponses.NOT_FOUND, constants_1.StatusCodes.StatusCodes.NOT_FOUND);
     }
     const otpFinder = await repositories_1.otpRepositories.otpRpositories.getOne({
         id: user.otp.otpId,
         otp,
     });
     if (!otpFinder || otpFinder.used) {
-        throw utilities_1.errorUtilities.createError(emailAuthResponses_1.EmailAuthResponses.INVALID_OTP, 400);
+        throw utilities_1.errorUtilities.createError(emailAuthResponses_1.EmailAuthResponses.INVALID_OTP, constants_1.StatusCodes.StatusCodes.BAD_REQUEST);
     }
     const verify = await helpers_1.generalHelpers.verifyOtp(otpFinder);
     if (!verify) {
-        throw utilities_1.errorUtilities.createError(emailAuthResponses_1.EmailAuthResponses.EXPIRED_OTP, 400);
+        throw utilities_1.errorUtilities.createError(emailAuthResponses_1.EmailAuthResponses.EXPIRED_OTP, constants_1.StatusCodes.StatusCodes.BAD_REQUEST);
     }
     const tokenPayload = {
         id: user.id,
@@ -140,57 +126,44 @@ const userVerifiesOtp = utilities_1.errorUtilities.withErrorHandling(async (user
     const mainUser = await repositories_1.userRepositories.userRepositories.getOne({
         email,
     });
-    await utilities_1.mailUtilities.sendMail(mainUser.email, `Welcome to Eventyzze, your email has been verified successfully. You can now login and start hosting your events 😊`, "Email Verified");
-    responseHandler.statusCode = 200;
-    responseHandler.message = emailAuthResponses_1.EmailAuthResponses.VERIFIED_ACCOUNT;
-    responseHandler.data = { user: mainUser, accessToken, refreshToken };
-    return responseHandler;
+    await utilities_1.mailUtilities.sendMail(mainUser.email, constants_1.EmailConstants.generateAuthMailMessages().ACCOUNT_VERIFIED(), constants_1.EmailConstants.EmailAuthMailSubjects.ACCOUNT);
+    return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.OK, emailAuthResponses_1.EmailAuthResponses.VERIFIED_ACCOUNT, { user: mainUser, accessToken, refreshToken });
 });
 const userLogin = utilities_1.errorUtilities.withErrorHandling(async (loginPayload) => {
-    const responseHandler = {
-        statusCode: 0,
-        message: "",
-        data: {},
-        details: {},
-        info: {},
-    };
     const { email, password, deviceId } = loginPayload;
     const projection = [
-        "password",
-        "email",
-        "id",
-        "role",
-        "isVerified",
-        "isBlacklisted",
-        "activeDeviceId",
-        "refreshToken",
-        "isInitialProfileSetupDone",
-        "fullName",
-        "provider",
+        constants_1.DatabaseConstants.DatabaseProjection.PASSWORD,
+        constants_1.DatabaseConstants.DatabaseProjection.EMAIL,
+        constants_1.DatabaseConstants.DatabaseProjection.ID,
+        constants_1.DatabaseConstants.DatabaseProjection.ROLE,
+        constants_1.DatabaseConstants.DatabaseProjection.VERIFIED,
+        constants_1.DatabaseConstants.DatabaseProjection.BLACKLISTED,
+        constants_1.DatabaseConstants.DatabaseProjection.DEVICEID,
+        constants_1.DatabaseConstants.DatabaseProjection.REFRESH_TOKEN,
+        constants_1.DatabaseConstants.DatabaseProjection.INITIAL_SETUP_DONE,
+        constants_1.DatabaseConstants.DatabaseProjection.FULL_NAME,
+        constants_1.DatabaseConstants.DatabaseProjection.PROVIDER,
     ];
     const filter = { email: email.trim() };
     const existingUser = await repositories_1.userRepositories.userRepositories.getOne(filter, projection);
     if (!existingUser) {
-        throw utilities_1.errorUtilities.createError(emailAuthResponses_1.EmailAuthResponses.NOT_FOUND, 404);
+        throw utilities_1.errorUtilities.createError(emailAuthResponses_1.EmailAuthResponses.NOT_FOUND, constants_1.StatusCodes.StatusCodes.NOT_FOUND);
     }
     if (existingUser.provider !== modelTypes_1.SignupProvider.Email) {
-        throw utilities_1.errorUtilities.createError(emailAuthResponses_1.EmailAuthResponses.WRONG_LOGIN_METHOD, 400);
+        throw utilities_1.errorUtilities.createError(emailAuthResponses_1.EmailAuthResponses.WRONG_LOGIN_METHOD, constants_1.StatusCodes.StatusCodes.BAD_REQUEST);
     }
     if (!existingUser.isVerified) {
-        responseHandler.statusCode = 403;
-        responseHandler.message = emailAuthResponses_1.EmailAuthResponses.UNVERIFIED_ACCOUNT;
-        responseHandler.data = { user: existingUser };
-        return responseHandler;
+        return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.FORBIDDEN, emailAuthResponses_1.EmailAuthResponses.UNVERIFIED_ACCOUNT, { user: existingUser });
     }
     if (existingUser.isBlacklisted) {
-        throw utilities_1.errorUtilities.createError(emailAuthResponses_1.EmailAuthResponses.BLOCKED_ACCOUNT, 400);
+        throw utilities_1.errorUtilities.createError(emailAuthResponses_1.EmailAuthResponses.BLOCKED_ACCOUNT, constants_1.StatusCodes.StatusCodes.BAD_REQUEST);
     }
     const verifyPassword = await helpers_1.generalHelpers.validatePassword(password.trim(), existingUser.password);
     if (!verifyPassword) {
-        throw utilities_1.errorUtilities.createError(emailAuthResponses_1.EmailAuthResponses.INCORRECT_PASSWORD, 400);
+        throw utilities_1.errorUtilities.createError(emailAuthResponses_1.EmailAuthResponses.INCORRECT_PASSWORD, constants_1.StatusCodes.StatusCodes.BAD_REQUEST);
     }
     if (existingUser.activeDeviceId && existingUser.activeDeviceId !== deviceId) {
-        throw utilities_1.errorUtilities.createError(emailAuthResponses_1.EmailAuthResponses.ALREADY_LOGGED_IN, 409);
+        throw utilities_1.errorUtilities.createError(emailAuthResponses_1.EmailAuthResponses.ALREADY_LOGGED_IN, constants_1.StatusCodes.StatusCodes.CONFLICT);
     }
     const tokenPayload = {
         id: existingUser.id,
@@ -203,19 +176,12 @@ const userLogin = utilities_1.errorUtilities.withErrorHandling(async (loginPaylo
     let mailSubject = "";
     const dateDetails = helpers_1.generalHelpers.dateFormatter(new Date());
     if (!existingUser.refreshToken || !existingUser.isInitialProfileSetupDone) {
-        mailMessage = `Welcome to Eventyzze ${existingUser.fullName ? existingUser.fullName : ""}! <br /><br />
-
-          We're excited to have you on board. Eventyzze is your go-to platform for discovering, organizing, and sharing amazing events. Whether you're attending or hosting, we're here to make your experience seamless and enjoyable. <br /> <br />
-
-          If you have any questions or need help getting started, feel free to reach out to our support team. We're always here to assist you. <br /> <br />
-
-          Let's make some unforgettable moments together!`;
-        mailSubject = `Welcome to Eventyzze ${existingUser.fullName ? existingUser.fullName : ""}`;
+        mailMessage = `${constants_1.EmailConstants.EmailAuthMailSubjects.WELCOME} ${existingUser.fullName ? existingUser.fullName : ""}! ${constants_1.EmailConstants.generateAuthMailMessages().NEW_USER_LOGIN()}`;
+        mailSubject = `${constants_1.EmailConstants.EmailAuthMailSubjects.WELCOME} ${existingUser.fullName ? existingUser.fullName : ""}`;
     }
     else {
-        mailSubject = "Activity Detected on Your Account";
-        mailMessage = `Hi ${existingUser.fullName ? existingUser.fullName : ""},
-      There was a login to your account on ${dateDetails.date} by ${dateDetails.time}.<br /><br /> If you did not initiate this login, contact our support team to restrict your account. If it was you, please ignore.`;
+        mailSubject = constants_1.EmailConstants.EmailAuthMailSubjects.LOGIN_ACTIVITY;
+        mailMessage = constants_1.EmailConstants.generateAuthMailMessages().EXISTING_USER_LOGIN(existingUser.fullName, dateDetails.date, dateDetails.time);
     }
     existingUser.refreshToken = refreshToken;
     existingUser.activeDeviceId = deviceId;
@@ -223,43 +189,21 @@ const userLogin = utilities_1.errorUtilities.withErrorHandling(async (loginPaylo
     const newExistingUser = await repositories_1.userRepositories.userRepositories.getOne(filter);
     const userWithoutPassword = await repositories_1.userRepositories.userRepositories.extractUserDetails(newExistingUser);
     await utilities_1.mailUtilities.sendMail(existingUser.email, mailMessage, mailSubject);
-    responseHandler.statusCode = 200;
-    responseHandler.message =
-        emailAuthResponses_1.EmailAuthResponses.WELCOME_BACK +
-            `${existingUser.userName ? existingUser.userName : ""}`;
-    responseHandler.data = {
-        user: userWithoutPassword,
-        accessToken: accessToken,
-        refreshToken: refreshToken,
-    };
-    return responseHandler;
+    return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.OK, emailAuthResponses_1.EmailAuthResponses.WELCOME_BACK, { user: userWithoutPassword, accessToken, refreshToken });
 });
 const userResendsOtpService = utilities_1.errorUtilities.withErrorHandling(async (resendPayload) => {
-    const responseHandler = {
-        statusCode: 0,
-        message: "",
-        data: {},
-        details: {},
-        info: {},
-    };
     const { email } = resendPayload;
-    const user = await repositories_1.userRepositories.userRepositories.getOne({ email }, ["email", "id", "otp", "isVerified"]);
+    const user = await repositories_1.userRepositories.userRepositories.getOne({ email }, [constants_1.DatabaseConstants.DatabaseProjection.EMAIL, constants_1.DatabaseConstants.DatabaseProjection.ID, constants_1.DatabaseConstants.DatabaseProjection.OTP, constants_1.DatabaseConstants.DatabaseProjection.VERIFIED]);
     if (!user) {
-        responseHandler.statusCode = 404;
-        responseHandler.message = emailAuthResponses_1.EmailAuthResponses.NOT_FOUND;
-        return responseHandler;
+        return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.NOT_FOUND, emailAuthResponses_1.EmailAuthResponses.NOT_FOUND);
     }
     if (user.isVerified) {
-        responseHandler.statusCode = 400;
-        responseHandler.message = emailAuthResponses_1.EmailAuthResponses.ALREADY_VERIFIED;
-        return responseHandler;
+        return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.BAD_REQUEST, emailAuthResponses_1.EmailAuthResponses.ALREADY_VERIFIED);
     }
     const otpDetails = user.otp;
     if (new Date(otpDetails.expiresAt) > new Date()) {
-        await utilities_1.mailUtilities.sendMail(email, `Welcome to Eventyzze, your OTP is ${otpDetails.otp}, it expires soon`, "Eventyzze OTP");
-        responseHandler.statusCode = 200;
-        responseHandler.message = emailAuthResponses_1.EmailAuthResponses.OTP_RESENT;
-        return responseHandler;
+        await utilities_1.mailUtilities.sendMail(email, constants_1.EmailConstants.generateAuthMailMessages().OTP(otpDetails.otp), constants_1.EmailConstants.EmailAuthMailSubjects.OTP);
+        return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.OK, emailAuthResponses_1.EmailAuthResponses.OTP_RESENT);
     }
     const { otp, expiresAt } = await helpers_1.generalHelpers.generateOtp();
     const otpId = (0, uuid_1.v4)();
@@ -286,27 +230,16 @@ const userResendsOtpService = utilities_1.errorUtilities.withErrorHandling(async
         },
     ];
     await databaseTransactions_middleware_1.default.performTransaction(operations);
-    await utilities_1.mailUtilities.sendMail(email, `Welcome to Eventyzze, your OTP is ${otp}, it expires in 5 minutes`, "Eventyzze OTP");
-    responseHandler.statusCode = 200;
-    responseHandler.message = emailAuthResponses_1.EmailAuthResponses.OTP_RESENT;
-    return responseHandler;
+    await utilities_1.mailUtilities.sendMail(email, constants_1.EmailConstants.generateAuthMailMessages().OTP(otp), constants_1.EmailConstants.EmailAuthMailSubjects.OTP);
+    return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.OK, emailAuthResponses_1.EmailAuthResponses.OTP_RESENT);
 });
 const userLogoutService = utilities_1.errorUtilities.withErrorHandling(async (logoutPayload) => {
-    const responseHandler = {
-        statusCode: 0,
-        message: "",
-        data: {},
-        details: {},
-        info: {},
-    };
     const { email } = logoutPayload;
     const user = await repositories_1.userRepositories.userRepositories.getOne({ email });
     if (user) {
         await repositories_1.userRepositories.userRepositories.updateOne({ email }, { activeDeviceId: null });
     }
-    responseHandler.message = emailAuthResponses_1.EmailAuthResponses.LOGOUT_MESSAGE;
-    responseHandler.statusCode = 200;
-    return responseHandler;
+    return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.OK, emailAuthResponses_1.EmailAuthResponses.LOGOUT_MESSAGE);
 });
 // const adminRegistrationService = errorUtilities.withErrorHandling(async (userPayload: Record<string, any>) => {
 //     const responseHandler: ResponseDetails = {

@@ -28,30 +28,25 @@ import { dyteHelpers, generalHelpers } from "../../helpers";
 import performTransaction from "../../middlewares/databaseTransactions.middleware";
 import { dyteServices } from "../../services";
 import handleServicesResponse from "../../utilities/responseHandlers/response.utilities";
+import { DatabaseConstants, EmailConstants, StatusCodes } from "../../constants";
+import { HostServiceResponses } from '../../types/responseTypes/hostServiceResponses'
 
 const getAllHostsService = errorUtilities.withErrorHandling(
   async (): Promise<Record<string, any>> => {
-    const responseHandler: ResponseDetails = {
-      statusCode: 0,
-      message: "",
-      data: {},
-      details: {},
-      info: {},
-    };
 
     const projection = [
-      "id",
-      "fullName",
-      "userName",
-      "numberOfEventsHosted",
-      "numberOfEventsAttended",
-      "userImage",
-      "noOfFollowers",
-      "newlyUpgraded",
-      "phone",
-      "eventyzzeId",
-      "email",
-      "role"
+      DatabaseConstants.DatabaseProjection.ID,
+      DatabaseConstants.DatabaseProjection.FULL_NAME,
+      DatabaseConstants.DatabaseProjection.USERNAME,
+      DatabaseConstants.DatabaseProjection.HOSTED_EVENTS,
+      DatabaseConstants.DatabaseProjection.ATTENDED_EVENTS,
+      DatabaseConstants.DatabaseProjection.USERIMAGE,
+      DatabaseConstants.DatabaseProjection.NO_OF_FOLLOWERS,
+      DatabaseConstants.DatabaseProjection.NEWLY_UPGRADED,
+      DatabaseConstants.DatabaseProjection.PHONE_NUMBER,
+      DatabaseConstants.DatabaseProjection.EVENTYZZE_ID,
+      DatabaseConstants.DatabaseProjection.EMAIL,
+      DatabaseConstants.DatabaseProjection.ROLE
     ];
 
     const hosts: any = await userRepositories.userRepositories.getMany(
@@ -60,18 +55,18 @@ const getAllHostsService = errorUtilities.withErrorHandling(
       },
       projection,
       [
-        ['newlyUpgraded', 'DESC'],
-        ['createdAt', 'DESC'],
+        [DatabaseConstants.DatabaseProjection.NEWLY_UPGRADED, DatabaseConstants.DatabaseCadre.DESC],
+        [DatabaseConstants.DatabaseProjection.CREATED_AT, DatabaseConstants.DatabaseCadre.DESC],
       ],
 
     );
 
     if (!hosts) {
-      throw errorUtilities.createError('Unable to get hosts', 404)
+      throw errorUtilities.createError(HostServiceResponses.UNABLE_TO_FETCH, StatusCodes.StatusCodes.NOT_FOUND)
     }
     return handleServicesResponse.handleServicesResponse(
-      200,
-      "Hosts fetched successfully",
+      StatusCodes.StatusCodes.OK,
+      HostServiceResponses.SUCCESSFUL_FETCH,
       hosts
     );
   }
@@ -84,17 +79,17 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
   ): Promise<Record<string, any>> => {
 
     const projection = [
-      "id",
-      "role",
-      "fullName",
-      "userName",
-      "numberOfEventsHosted",
-      "numberOfEventsAttended",
-      "userImage",
-      "noOfFollowers",
-      "subscriptionPlan",
-      "subscriptionDetails",
-      "email",
+      DatabaseConstants.DatabaseProjection.ID,
+      DatabaseConstants.DatabaseProjection.ROLE,
+      DatabaseConstants.DatabaseProjection.FULL_NAME,
+      DatabaseConstants.DatabaseProjection.USERNAME,
+      DatabaseConstants.DatabaseProjection.HOSTED_EVENTS,
+      DatabaseConstants.DatabaseProjection.ATTENDED_EVENTS,
+      DatabaseConstants.DatabaseProjection.USERIMAGE,
+      DatabaseConstants.DatabaseProjection.NO_OF_FOLLOWERS,
+      DatabaseConstants.DatabaseProjection.SUBSCRIPTION_PLAN,
+      DatabaseConstants.DatabaseProjection.SUBSCRIPTION_DETAILS,
+      DatabaseConstants.DatabaseProjection.EMAIL,
     ];
 
     const user = (await userRepositories.userRepositories.getOne(
@@ -103,25 +98,25 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
     )) as unknown as UserAttributes;
 
     if (!user) {
-      throw errorUtilities.createError("User does not exist", 404);
+      throw errorUtilities.createError(HostServiceResponses.NOT_FOUND, StatusCodes.StatusCodes.NOT_FOUND);
     }
 
     if (user.role === Roles.User && user.isInitialHostingOfferExhausted) {
-      throw errorUtilities.createError("You cannot Host an event unless you upgrade to a host", 400);
+      throw errorUtilities.createError(HostServiceResponses.UPGRADE_TO_HOST, StatusCodes.StatusCodes.BAD_REQUEST);
     }
 
     if (
       user.subscriptionPlan !== SubscriptionPlans.Free &&
       new Date(user.subscriptionDetails?.dateOfExpiry) >= new Date()
     ) {
-      throw errorUtilities.createError("Plan has expired, please pay again or upgrade before you can host an event", 400);
+      throw errorUtilities.createError(HostServiceResponses.EXPIRED_PLAN, StatusCodes.StatusCodes.BAD_REQUEST);
     }
 
     if (
       user.subscriptionDetails.type === SubscriptionPlans.Free &&
       user.subscriptionDetails.hasPaid === false
     ) {
-      throw errorUtilities.createError("You cannot Host an event unless you upgrade to a host", 400);
+      throw errorUtilities.createError(HostServiceResponses.UPGRADE_TO_HOST, StatusCodes.StatusCodes.BAD_REQUEST);
     }
 
     let userDyteData;
@@ -198,8 +193,8 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
 
     if (!createEvent)
       throw errorUtilities.createError(
-        "Unable to create Event, please try again",
-        400
+        HostServiceResponses.UNABLE_TO_CREATE_EVENT,
+        StatusCodes.StatusCodes.BAD_REQUEST
       );
 
     const EventWallet = await walletRepositories.walletRepositories.create(
@@ -208,8 +203,8 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
 
     if (!EventWallet)
       throw errorUtilities.createError(
-        "Unable to create Event, please try again",
-        400
+        HostServiceResponses.UNABLE_TO_CREATE_EVENT,
+        StatusCodes.StatusCodes.BAD_REQUEST
       );
 
     const newEvent = await eventRepositories.eventRepositories.getOne({
@@ -218,13 +213,13 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
 
     await mailUtilities.sendMail(
       user.email,
-      `Hello ${user.userName}, your event has been created, please do not forget to join on the selected date`,
-      "Eventyzze Event Creation"
+      EmailConstants.generateAuthMailMessages().EVENT_CREATION(user.userName),
+      EmailConstants.EmailAuthMailSubjects.EVENT_CREATION
     );
 
     return handleServicesResponse.handleServicesResponse(
-      201,
-      "Event created successfully",
+      StatusCodes.StatusCodes.CREATED,
+      HostServiceResponses.SUCCESSFUL_CREATION,
       newEvent
     );
   }

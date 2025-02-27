@@ -12,67 +12,62 @@ const helpers_1 = require("../../helpers");
 const databaseTransactions_middleware_1 = __importDefault(require("../../middlewares/databaseTransactions.middleware"));
 const services_1 = require("../../services");
 const response_utilities_1 = __importDefault(require("../../utilities/responseHandlers/response.utilities"));
+const constants_1 = require("../../constants");
+const hostServiceResponses_1 = require("../../types/responseTypes/hostServiceResponses");
 const getAllHostsService = utilities_1.errorUtilities.withErrorHandling(async () => {
-    const responseHandler = {
-        statusCode: 0,
-        message: "",
-        data: {},
-        details: {},
-        info: {},
-    };
     const projection = [
-        "id",
-        "fullName",
-        "userName",
-        "numberOfEventsHosted",
-        "numberOfEventsAttended",
-        "userImage",
-        "noOfFollowers",
-        "newlyUpgraded",
-        "phone",
-        "eventyzzeId",
-        "email",
-        "role"
+        constants_1.DatabaseConstants.DatabaseProjection.ID,
+        constants_1.DatabaseConstants.DatabaseProjection.FULL_NAME,
+        constants_1.DatabaseConstants.DatabaseProjection.USERNAME,
+        constants_1.DatabaseConstants.DatabaseProjection.HOSTED_EVENTS,
+        constants_1.DatabaseConstants.DatabaseProjection.ATTENDED_EVENTS,
+        constants_1.DatabaseConstants.DatabaseProjection.USERIMAGE,
+        constants_1.DatabaseConstants.DatabaseProjection.NO_OF_FOLLOWERS,
+        constants_1.DatabaseConstants.DatabaseProjection.NEWLY_UPGRADED,
+        constants_1.DatabaseConstants.DatabaseProjection.PHONE_NUMBER,
+        constants_1.DatabaseConstants.DatabaseProjection.EVENTYZZE_ID,
+        constants_1.DatabaseConstants.DatabaseProjection.EMAIL,
+        constants_1.DatabaseConstants.DatabaseProjection.ROLE
     ];
     const hosts = await repositories_1.userRepositories.userRepositories.getMany({
     // role: Roles.Host 
     }, projection, [
-        ['newlyUpgraded', 'DESC'],
-        ['createdAt', 'DESC'],
+        [constants_1.DatabaseConstants.DatabaseProjection.NEWLY_UPGRADED, constants_1.DatabaseConstants.DatabaseCadre.DESC],
+        [constants_1.DatabaseConstants.DatabaseProjection.CREATED_AT, constants_1.DatabaseConstants.DatabaseCadre.DESC],
     ]);
     if (!hosts) {
-        throw utilities_1.errorUtilities.createError('Unable to get hosts', 404);
+        throw utilities_1.errorUtilities.createError(hostServiceResponses_1.HostServiceResponses.UNABLE_TO_FETCH, constants_1.StatusCodes.StatusCodes.NOT_FOUND);
     }
-    return response_utilities_1.default.handleServicesResponse(200, "Hosts fetched successfully", hosts);
+    return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.OK, hostServiceResponses_1.HostServiceResponses.SUCCESSFUL_FETCH, hosts);
 });
 const hostCreatesEventService = utilities_1.errorUtilities.withErrorHandling(async (userId, eventCreationDetails) => {
     const projection = [
-        "id",
-        "role",
-        "fullName",
-        "userName",
-        "numberOfEventsHosted",
-        "numberOfEventsAttended",
-        "userImage",
-        "noOfFollowers",
-        "subscriptionPlan",
-        "subscriptionDetails",
-        "email",
+        constants_1.DatabaseConstants.DatabaseProjection.ID,
+        constants_1.DatabaseConstants.DatabaseProjection.ROLE,
+        constants_1.DatabaseConstants.DatabaseProjection.FULL_NAME,
+        constants_1.DatabaseConstants.DatabaseProjection.USERNAME,
+        constants_1.DatabaseConstants.DatabaseProjection.HOSTED_EVENTS,
+        constants_1.DatabaseConstants.DatabaseProjection.ATTENDED_EVENTS,
+        constants_1.DatabaseConstants.DatabaseProjection.USERIMAGE,
+        constants_1.DatabaseConstants.DatabaseProjection.NO_OF_FOLLOWERS,
+        constants_1.DatabaseConstants.DatabaseProjection.SUBSCRIPTION_PLAN,
+        constants_1.DatabaseConstants.DatabaseProjection.SUBSCRIPTION_DETAILS,
+        constants_1.DatabaseConstants.DatabaseProjection.EMAIL,
     ];
     const user = (await repositories_1.userRepositories.userRepositories.getOne({ id: userId }, projection));
     if (!user) {
-        throw utilities_1.errorUtilities.createError("User does not exist", 404);
+        throw utilities_1.errorUtilities.createError(hostServiceResponses_1.HostServiceResponses.NOT_FOUND, constants_1.StatusCodes.StatusCodes.NOT_FOUND);
     }
     if (user.role === modelTypes_1.Roles.User && user.isInitialHostingOfferExhausted) {
-        throw utilities_1.errorUtilities.createError("You cannot Host an event unless you upgrade to a host", 400);
+        throw utilities_1.errorUtilities.createError(hostServiceResponses_1.HostServiceResponses.UPGRADE_TO_HOST, constants_1.StatusCodes.StatusCodes.BAD_REQUEST);
     }
     if (user.subscriptionPlan !== modelTypes_1.SubscriptionPlans.Free &&
         new Date(user.subscriptionDetails?.dateOfExpiry) >= new Date()) {
-        throw utilities_1.errorUtilities.createError("Plan has expired, please pay again or upgrade before you can host an event", 400);
+        throw utilities_1.errorUtilities.createError(hostServiceResponses_1.HostServiceResponses.EXPIRED_PLAN, constants_1.StatusCodes.StatusCodes.BAD_REQUEST);
     }
     if (user.subscriptionDetails.type === modelTypes_1.SubscriptionPlans.Free &&
         user.subscriptionDetails.hasPaid === false) {
-        throw utilities_1.errorUtilities.createError("You cannot Host an event unless you upgrade to a host", 400);
+        throw utilities_1.errorUtilities.createError(hostServiceResponses_1.HostServiceResponses.UPGRADE_TO_HOST, constants_1.StatusCodes.StatusCodes.BAD_REQUEST);
     }
     let userDyteData;
     if (user.subscriptionDetails.type === modelTypes_1.SubscriptionPlans.Free ||
@@ -123,15 +118,15 @@ const hostCreatesEventService = utilities_1.errorUtilities.withErrorHandling(asy
     };
     const createEvent = await repositories_1.eventRepositories.eventRepositories.create(eventPayload);
     if (!createEvent)
-        throw utilities_1.errorUtilities.createError("Unable to create Event, please try again", 400);
+        throw utilities_1.errorUtilities.createError(hostServiceResponses_1.HostServiceResponses.UNABLE_TO_CREATE_EVENT, constants_1.StatusCodes.StatusCodes.BAD_REQUEST);
     const EventWallet = await repositories_1.walletRepositories.walletRepositories.create(eventWalletPayload);
     if (!EventWallet)
-        throw utilities_1.errorUtilities.createError("Unable to create Event, please try again", 400);
+        throw utilities_1.errorUtilities.createError(hostServiceResponses_1.HostServiceResponses.UNABLE_TO_CREATE_EVENT, constants_1.StatusCodes.StatusCodes.BAD_REQUEST);
     const newEvent = await repositories_1.eventRepositories.eventRepositories.getOne({
         id: eventId,
     });
-    await utilities_1.mailUtilities.sendMail(user.email, `Hello ${user.userName}, your event has been created, please do not forget to join on the selected date`, "Eventyzze Event Creation");
-    return response_utilities_1.default.handleServicesResponse(201, "Event created successfully", newEvent);
+    await utilities_1.mailUtilities.sendMail(user.email, constants_1.EmailConstants.generateAuthMailMessages().EVENT_CREATION(user.userName), constants_1.EmailConstants.EmailAuthMailSubjects.EVENT_CREATION);
+    return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.CREATED, hostServiceResponses_1.HostServiceResponses.SUCCESSFUL_CREATION, newEvent);
 });
 const hostgetsAllTheirEventsService = utilities_1.errorUtilities.withErrorHandling(async (userId) => {
     const responseHandler = {
