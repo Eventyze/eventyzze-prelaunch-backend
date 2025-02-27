@@ -21,19 +21,23 @@ import {
   userRepositories,
   walletRepositories,
 } from "../../repositories";
-import dayjs from 'dayjs';
+import dayjs from "dayjs";
 import { v4 } from "uuid";
 import { Transaction } from "sequelize";
 import { dyteHelpers, generalHelpers } from "../../helpers";
 import performTransaction from "../../middlewares/databaseTransactions.middleware";
 import { dyteServices } from "../../services";
 import handleServicesResponse from "../../utilities/responseHandlers/response.utilities";
-import { DatabaseConstants, EmailConstants, StatusCodes, TransactionConstants } from "../../constants";
-import { HostServiceResponses } from '../../types/responseTypes/hostServiceResponses'
+import {
+  DatabaseConstants,
+  EmailConstants,
+  StatusCodes,
+  TransactionConstants,
+} from "../../constants";
+import { HostServiceResponses } from "../../types/responseTypes/hostServiceResponses";
 
 const getAllHostsService = errorUtilities.withErrorHandling(
   async (): Promise<Record<string, any>> => {
-
     const projection = [
       DatabaseConstants.DatabaseProjection.ID,
       DatabaseConstants.DatabaseProjection.FULL_NAME,
@@ -46,23 +50,31 @@ const getAllHostsService = errorUtilities.withErrorHandling(
       DatabaseConstants.DatabaseProjection.PHONE_NUMBER,
       DatabaseConstants.DatabaseProjection.EVENTYZZE_ID,
       DatabaseConstants.DatabaseProjection.EMAIL,
-      DatabaseConstants.DatabaseProjection.ROLE
+      DatabaseConstants.DatabaseProjection.ROLE,
     ];
 
     const hosts: any = await userRepositories.userRepositories.getMany(
-      { 
-        // role: Roles.Host 
+      {
+        // role: Roles.Host
       },
       projection,
       [
-        [DatabaseConstants.DatabaseProjection.NEWLY_UPGRADED, DatabaseConstants.DatabaseCadre.DESC],
-        [DatabaseConstants.DatabaseProjection.CREATED_AT, DatabaseConstants.DatabaseCadre.DESC],
-      ],
-
+        [
+          DatabaseConstants.DatabaseProjection.NEWLY_UPGRADED,
+          DatabaseConstants.DatabaseCadre.DESC,
+        ],
+        [
+          DatabaseConstants.DatabaseProjection.CREATED_AT,
+          DatabaseConstants.DatabaseCadre.DESC,
+        ],
+      ]
     );
 
     if (!hosts) {
-      throw errorUtilities.createError(HostServiceResponses.UNABLE_TO_FETCH, StatusCodes.StatusCodes.NOT_FOUND)
+      throw errorUtilities.createError(
+        HostServiceResponses.UNABLE_TO_FETCH,
+        StatusCodes.StatusCodes.NOT_FOUND
+      );
     }
     return handleServicesResponse.handleServicesResponse(
       StatusCodes.StatusCodes.OK,
@@ -77,7 +89,6 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
     userId: string,
     eventCreationDetails: Record<string, any>
   ): Promise<Record<string, any>> => {
-
     const projection = [
       DatabaseConstants.DatabaseProjection.ID,
       DatabaseConstants.DatabaseProjection.ROLE,
@@ -98,25 +109,37 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
     )) as unknown as UserAttributes;
 
     if (!user) {
-      throw errorUtilities.createError(HostServiceResponses.NOT_FOUND, StatusCodes.StatusCodes.NOT_FOUND);
+      throw errorUtilities.createError(
+        HostServiceResponses.NOT_FOUND,
+        StatusCodes.StatusCodes.NOT_FOUND
+      );
     }
 
     if (user.role === Roles.User && user.isInitialHostingOfferExhausted) {
-      throw errorUtilities.createError(HostServiceResponses.UPGRADE_TO_HOST, StatusCodes.StatusCodes.BAD_REQUEST);
+      throw errorUtilities.createError(
+        HostServiceResponses.UPGRADE_TO_HOST,
+        StatusCodes.StatusCodes.BAD_REQUEST
+      );
     }
 
     if (
       user.subscriptionPlan !== SubscriptionPlans.Free &&
       new Date(user.subscriptionDetails?.dateOfExpiry) >= new Date()
     ) {
-      throw errorUtilities.createError(HostServiceResponses.EXPIRED_PLAN, StatusCodes.StatusCodes.BAD_REQUEST);
+      throw errorUtilities.createError(
+        HostServiceResponses.EXPIRED_PLAN,
+        StatusCodes.StatusCodes.BAD_REQUEST
+      );
     }
 
     if (
       user.subscriptionDetails.type === SubscriptionPlans.Free &&
       user.subscriptionDetails.hasPaid === false
     ) {
-      throw errorUtilities.createError(HostServiceResponses.UPGRADE_TO_HOST, StatusCodes.StatusCodes.BAD_REQUEST);
+      throw errorUtilities.createError(
+        HostServiceResponses.UPGRADE_TO_HOST,
+        StatusCodes.StatusCodes.BAD_REQUEST
+      );
     }
 
     let userDyteData;
@@ -154,7 +177,11 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
 
     const formattedDate = dayjs(eventCreationDetails.date).format("YYYY-MM-DD");
 
-    const endTime = generalHelpers.calculateEndTime(eventCreationDetails.startTime, eventCreationDetails.duration, formattedDate)
+    const endTime = generalHelpers.calculateEndTime(
+      eventCreationDetails.startTime,
+      eventCreationDetails.duration,
+      formattedDate
+    );
 
     const eventPayload: Partial<EventAttributes> = {
       id: eventId,
@@ -172,6 +199,9 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
       videoUrl: eventCreationDetails.videoUrl,
       ownerName: user.userName,
       category: eventCreationDetails.category,
+      early_birds: eventCreationDetails.earlyBirdsStatus,
+      early_birds_discount: eventCreationDetails.earlyBirdsCost,
+      early_birds_end_date: eventCreationDetails.earlyBirdsDeadline,
       dyteDetails: {
         meetingId: dyteMeetingData.data.id,
         meetingTitle: dyteMeetingData.data.title,
@@ -179,7 +209,7 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
         updatedAt: dyteMeetingData.data.updated_at,
       },
     };
-    
+
     const eventWalletPayload = {
       id: v4(),
       ownerId: eventId,
@@ -227,59 +257,82 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
 
 const hostgetsAllTheirEventsService = errorUtilities.withErrorHandling(
   async (userId: string): Promise<Record<string, any>> => {
-
     const user = await userRepositories.userRepositories.getOne({ id: userId });
 
     if (!user) {
-      return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.NOT_FOUND, HostServiceResponses.NOT_FOUND)
+      return handleServicesResponse.handleServicesResponse(
+        StatusCodes.StatusCodes.NOT_FOUND,
+        HostServiceResponses.NOT_FOUND
+      );
     }
 
     const userEvents = await eventRepositories.eventRepositories.getMany({
       userId,
     });
 
-    return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.OK, HostServiceResponses.SUCCESSFUL, { events: userEvents })
+    return handleServicesResponse.handleServicesResponse(
+      StatusCodes.StatusCodes.OK,
+      HostServiceResponses.SUCCESSFUL,
+      { events: userEvents }
+    );
   }
 );
 
 const hostGetsSingleEventService = errorUtilities.withErrorHandling(
   async (userId: string, eventId: string): Promise<Record<string, any>> => {
-
     const user = await userRepositories.userRepositories.getOne({ id: userId });
 
     if (!user) {
-      return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.NOT_FOUND, HostServiceResponses.NOT_FOUND)
+      return handleServicesResponse.handleServicesResponse(
+        StatusCodes.StatusCodes.NOT_FOUND,
+        HostServiceResponses.NOT_FOUND
+      );
     }
 
     const singleEvent = await eventRepositories.eventRepositories.getOne({
       userId,
     });
 
-    return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.OK, HostServiceResponses.SUCCESSFUL, { event: singleEvent })
+    return handleServicesResponse.handleServicesResponse(
+      StatusCodes.StatusCodes.OK,
+      HostServiceResponses.SUCCESSFUL,
+      { event: singleEvent }
+    );
   }
 );
 
 const hostDeletesEvent = errorUtilities.withErrorHandling(
   async (userId: string, eventId: string): Promise<Record<string, any>> => {
-
     const user = await userRepositories.userRepositories.getOne({ id: userId });
     if (!user) {
-      return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.NOT_FOUND, HostServiceResponses.NOT_FOUND)
+      return handleServicesResponse.handleServicesResponse(
+        StatusCodes.StatusCodes.NOT_FOUND,
+        HostServiceResponses.NOT_FOUND
+      );
     }
 
     const event = (await eventRepositories.eventRepositories.getOne({
       id: eventId,
     })) as unknown as EventAttributes;
     if (!event) {
-      return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.NOT_FOUND, HostServiceResponses.EVENT_NOT_FOUND)
+      return handleServicesResponse.handleServicesResponse(
+        StatusCodes.StatusCodes.NOT_FOUND,
+        HostServiceResponses.EVENT_NOT_FOUND
+      );
     }
 
     if (event.userId !== userId) {
-      return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.BAD_REQUEST, HostServiceResponses.UNABLE_TO_DELETE_UNOWNED_EVENT)
+      return handleServicesResponse.handleServicesResponse(
+        StatusCodes.StatusCodes.BAD_REQUEST,
+        HostServiceResponses.UNABLE_TO_DELETE_UNOWNED_EVENT
+      );
     }
 
     if (event.isLive) {
-      return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.BAD_REQUEST, HostServiceResponses.UNABLE_TO_DELETE_LIVE_EVENT)
+      return handleServicesResponse.handleServicesResponse(
+        StatusCodes.StatusCodes.BAD_REQUEST,
+        HostServiceResponses.UNABLE_TO_DELETE_LIVE_EVENT
+      );
     }
 
     const attendees: any =
@@ -324,7 +377,10 @@ const hostDeletesEvent = errorUtilities.withErrorHandling(
                 date: new Date(),
                 reference: transactionReference,
                 userEventyzzeId: attendee.eventyzzeId,
-                description: EmailConstants.generateMessages().REFUND_TRANSACTION_DESCRIPTION(event.eventTitle),
+                description:
+                  EmailConstants.generateMessages().REFUND_TRANSACTION_DESCRIPTION(
+                    event.eventTitle
+                  ),
               },
               transaction
             );
@@ -347,7 +403,10 @@ const hostDeletesEvent = errorUtilities.withErrorHandling(
           status: TransactionConstants.TransactionStatus.COMPLETED,
           date: new Date(),
           userEventyzzeId: "",
-          description: EmailConstants.generateMessages().REFUND_TRANSACTION_DESCRIPTION(event.eventTitle),
+          description:
+            EmailConstants.generateMessages().REFUND_TRANSACTION_DESCRIPTION(
+              event.eventTitle
+            ),
         });
 
         try {
@@ -362,11 +421,17 @@ const hostDeletesEvent = errorUtilities.withErrorHandling(
       }
 
       await eventRepositories.eventRepositories.deleteOne({ id: eventId });
-      return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.OK, HostServiceResponses.EVENT_DELETE_WITH_REFUNDS)
+      return handleServicesResponse.handleServicesResponse(
+        StatusCodes.StatusCodes.OK,
+        HostServiceResponses.EVENT_DELETE_WITH_REFUNDS
+      );
     }
 
     await eventRepositories.eventRepositories.deleteOne({ id: eventId });
-    return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.OK, HostServiceResponses.EVENT_DELETED_NO_REFUNDS)
+    return handleServicesResponse.handleServicesResponse(
+      StatusCodes.StatusCodes.OK,
+      HostServiceResponses.EVENT_DELETED_NO_REFUNDS
+    );
   }
 );
 

@@ -61,7 +61,7 @@ Events.init({
         defaultValue: false
     },
     early_birds_discount: {
-        type: sequelize_1.DataTypes.INTEGER,
+        type: sequelize_1.DataTypes.STRING,
         allowNull: true,
         defaultValue: null
     },
@@ -70,11 +70,11 @@ Events.init({
         allowNull: true,
         defaultValue: null
     },
-    early_birds_start_date: {
-        type: sequelize_1.DataTypes.STRING,
-        allowNull: true,
-        defaultValue: null
-    },
+    // early_birds_start_date: {
+    //   type: DataTypes.STRING,
+    //   allowNull: true,
+    //   defaultValue: null
+    // },
     noOfViews: {
         type: sequelize_1.DataTypes.INTEGER,
         allowNull: false,

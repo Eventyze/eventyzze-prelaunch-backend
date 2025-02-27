@@ -27,13 +27,19 @@ const getAllHostsService = utilities_1.errorUtilities.withErrorHandling(async ()
         constants_1.DatabaseConstants.DatabaseProjection.PHONE_NUMBER,
         constants_1.DatabaseConstants.DatabaseProjection.EVENTYZZE_ID,
         constants_1.DatabaseConstants.DatabaseProjection.EMAIL,
-        constants_1.DatabaseConstants.DatabaseProjection.ROLE
+        constants_1.DatabaseConstants.DatabaseProjection.ROLE,
     ];
     const hosts = await repositories_1.userRepositories.userRepositories.getMany({
-    // role: Roles.Host 
+    // role: Roles.Host
     }, projection, [
-        [constants_1.DatabaseConstants.DatabaseProjection.NEWLY_UPGRADED, constants_1.DatabaseConstants.DatabaseCadre.DESC],
-        [constants_1.DatabaseConstants.DatabaseProjection.CREATED_AT, constants_1.DatabaseConstants.DatabaseCadre.DESC],
+        [
+            constants_1.DatabaseConstants.DatabaseProjection.NEWLY_UPGRADED,
+            constants_1.DatabaseConstants.DatabaseCadre.DESC,
+        ],
+        [
+            constants_1.DatabaseConstants.DatabaseProjection.CREATED_AT,
+            constants_1.DatabaseConstants.DatabaseCadre.DESC,
+        ],
     ]);
     if (!hosts) {
         throw utilities_1.errorUtilities.createError(hostServiceResponses_1.HostServiceResponses.UNABLE_TO_FETCH, constants_1.StatusCodes.StatusCodes.NOT_FOUND);
@@ -103,6 +109,9 @@ const hostCreatesEventService = utilities_1.errorUtilities.withErrorHandling(asy
         videoUrl: eventCreationDetails.videoUrl,
         ownerName: user.userName,
         category: eventCreationDetails.category,
+        early_birds: eventCreationDetails.earlyBirdsStatus,
+        early_birds_discount: eventCreationDetails.earlyBirdsCost,
+        early_birds_end_date: eventCreationDetails.earlyBirdsDeadline,
         dyteDetails: {
             meetingId: dyteMeetingData.data.id,
             meetingTitle: dyteMeetingData.data.title,

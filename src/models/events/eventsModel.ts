@@ -67,7 +67,7 @@ Events.init(
       },
 
       early_birds_discount: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: true,
         defaultValue: null
       },
@@ -78,11 +78,11 @@ Events.init(
         defaultValue: null
       },
 
-      early_birds_start_date: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: null
-      },
+      // early_birds_start_date: {
+      //   type: DataTypes.STRING,
+      //   allowNull: true,
+      //   defaultValue: null
+      // },
 
       noOfViews: {
         type: DataTypes.INTEGER,
