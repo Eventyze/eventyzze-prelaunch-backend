@@ -23,6 +23,12 @@ enum DatabaseProjection {
     CREATED_AT = "createdAt",
     SUBSCRIPTION_PLAN = "subscriptionPlan",
     SUBSCRIPTION_DETAILS = "subscriptionDetails",
+    EVENT_TITLE = "eventTitle",
+    EVENT_OWNER_NAME = "ownerName",
+    EVENT_COVER_IMAGE = "coverImage",
+    EVENT_IS_LIVE = "isLive",
+    EVENT_NO_OF_LIKES = "noOfLikes",
+    INTERESTS = "interests",
 
 }
 

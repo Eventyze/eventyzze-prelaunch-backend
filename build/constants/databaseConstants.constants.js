@@ -25,6 +25,12 @@ var DatabaseProjection;
     DatabaseProjection["CREATED_AT"] = "createdAt";
     DatabaseProjection["SUBSCRIPTION_PLAN"] = "subscriptionPlan";
     DatabaseProjection["SUBSCRIPTION_DETAILS"] = "subscriptionDetails";
+    DatabaseProjection["EVENT_TITLE"] = "eventTitle";
+    DatabaseProjection["EVENT_OWNER_NAME"] = "ownerName";
+    DatabaseProjection["EVENT_COVER_IMAGE"] = "coverImage";
+    DatabaseProjection["EVENT_IS_LIVE"] = "isLive";
+    DatabaseProjection["EVENT_NO_OF_LIKES"] = "noOfLikes";
+    DatabaseProjection["INTERESTS"] = "interests";
 })(DatabaseProjection || (DatabaseProjection = {}));
 var DatabaseCadre;
 (function (DatabaseCadre) {

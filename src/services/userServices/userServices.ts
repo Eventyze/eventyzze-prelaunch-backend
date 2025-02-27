@@ -7,6 +7,8 @@ import { UserAttributes } from "../../types/modelTypes";
 import { generalHelpers } from "../../helpers";
 import { Op } from "sequelize";
 import handleServicesResponse from "../../utilities/responseHandlers/response.utilities";
+import { DatabaseConstants, EmailConstants, StatusCodes } from "../../constants";
+import { UserResponses } from "../../types/responseTypes/userServiceResponses";
 
 const userProfileUpdateService = errorUtilities.withErrorHandling(
   async (profilePayload: Record<string, any>): Promise<Record<string, any>> => {
@@ -27,8 +29,8 @@ const userProfileUpdateService = errorUtilities.withErrorHandling(
       (!body.address || body.address === "")
     ) {
       throw errorUtilities.createError(
-        "At least one field must be selected for update",
-        400
+        UserResponses.SELECT_A_FIELD,
+        StatusCodes.StatusCodes.BAD_REQUEST
       );
     }
 
@@ -37,19 +39,19 @@ const userProfileUpdateService = errorUtilities.withErrorHandling(
     if (body.userName) {
       if (body.userName === user.userName) {
         throw errorUtilities.createError(
-          "This is your current username, please choose another username if you wish to change it",
-          400
+          UserResponses.SELECT_DIFFERENT_USERNAME,
+          StatusCodes.StatusCodes.BAD_REQUEST
         );
       }
       const confirmUserName = await userRepositories.userRepositories.getOne(
         { userName: body.userName },
-        ["userName"]
+        [DatabaseConstants.DatabaseProjection.USERNAME]
       );
 
       if (confirmUserName) {
         throw errorUtilities.createError(
-          "Username unavailable, please choose another username",
-          400
+          UserResponses.UNAVAILABLE_USER_NAME,
+          StatusCodes.StatusCodes.BAD_REQUEST
         );
       }
 
@@ -66,7 +68,10 @@ const userProfileUpdateService = errorUtilities.withErrorHandling(
 
     if (body.phone) {
       if (!validator.isMobilePhone(body.phone, "any")) {
-        throw errorUtilities.createError("Invalid phone number", 400);
+        throw errorUtilities.createError(
+          UserResponses.INVALID_PHONE,
+          StatusCodes.StatusCodes.BAD_REQUEST
+        );
       }
       updateDetails.phone = body.phone.trim();
     }
@@ -93,8 +98,8 @@ const userProfileUpdateService = errorUtilities.withErrorHandling(
     );
 
     return handleServicesResponse.handleServicesResponse(
-      200,
-      "Profile updated successfully",
+      StatusCodes.StatusCodes.OK,
+      UserResponses.SUCCESSFULY_PROFILE_CREATION,
       newUser
     );
   }
@@ -103,10 +108,13 @@ const userProfileUpdateService = errorUtilities.withErrorHandling(
 const updateUserImageService = errorUtilities.withErrorHandling(
   async (imageUrl: string, id: string): Promise<any> => {
     if (!imageUrl) {
-      throw errorUtilities.createError("Select an Image", 400);
+      throw errorUtilities.createError(
+        UserResponses.SELECT_AN_IMAGE,
+        StatusCodes.StatusCodes.BAD_REQUEST
+      );
     }
 
-    const newMovie: any = await userRepositories.userRepositories.updateOne(
+    const newUserImage: any = await userRepositories.userRepositories.updateOne(
       {
         id,
       },
@@ -115,9 +123,9 @@ const updateUserImageService = errorUtilities.withErrorHandling(
       }
     );
     return handleServicesResponse.handleServicesResponse(
-      200,
-      "Movie image changed successfully",
-      newMovie
+      StatusCodes.StatusCodes.OK,
+      UserResponses.USER_IMAGE_UPDATE_SUCCESS,
+      newUserImage
     );
   }
 );
@@ -144,11 +152,17 @@ const userfirstimeProfileUpdateService = errorUtilities.withErrorHandling(
     })) as unknown as UserAttributes;
 
     if (!user) {
-      throw errorUtilities.createError("User not found", 404);
+      throw errorUtilities.createError(
+        UserResponses.NOT_FOUND,
+        StatusCodes.StatusCodes.NOT_FOUND
+      );
     }
 
     if (!validator.isMobilePhone(phone, "any")) {
-      throw errorUtilities.createError("Invalid phone number", 400);
+      throw errorUtilities.createError(
+        UserResponses.INVALID_PHONE,
+        StatusCodes.StatusCodes.BAD_REQUEST
+      );
     }
     let userEventyzzeId;
 
@@ -159,11 +173,10 @@ const userfirstimeProfileUpdateService = errorUtilities.withErrorHandling(
       );
     } catch (error) {
       throw errorUtilities.createError(
-        "Failed to generate unique identifier, please try again",
-        500
+        UserResponses.EVENTYZZE_ID_GENERATE_FAILURE,
+        StatusCodes.StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
-
 
     const tokenPayload = {
       id: user.id,
@@ -177,21 +190,10 @@ const userfirstimeProfileUpdateService = errorUtilities.withErrorHandling(
       "30d"
     );
 
-    
     if (!user.refreshToken || !user.isInitialProfileSetupDone) {
-      let mailMessage = "";
-      let mailSubject = "";
-      mailMessage = `Welcome to Eventyzze ${
-        user.fullName ? user.fullName : ""
-      }! <br /><br />
+     let mailMessage = EmailConstants.generateMessages().FIRST_PROFILE_UPDATE_SUCCESSFUL(user.fullName)
 
-          We're excited to have you on board. Eventyzze is your go-to platform for discovering, organizing, and sharing amazing events. Whether you're attending or hosting, we're here to make your experience seamless and enjoyable. <br /> <br />
-
-          If you have any questions or need help getting started, feel free to reach out to our support team. We're always here to assist you. <br /> <br />
-
-          Let's make some unforgettable moments together!`;
-
-      mailSubject = `Welcome to Eventyzze ${
+     let mailSubject = `${EmailConstants.MailSubjects.WELCOME} ${
         user.fullName ? user.fullName : ""
       }`;
       await mailUtilities.sendMail(user.email, mailMessage, mailSubject);
@@ -210,11 +212,11 @@ const userfirstimeProfileUpdateService = errorUtilities.withErrorHandling(
       profilePayload
     );
 
-    const userData = { user: newUser, accessToken, refreshToken }
+    const userData = { user: newUser, accessToken, refreshToken };
 
     return handleServicesResponse.handleServicesResponse(
-      200,
-      "Profile updated successfully",
+      StatusCodes.StatusCodes.OK,
+      UserResponses.SUCCESSFULY_PROFILE_CREATION,
       userData
     );
   }
@@ -224,93 +226,100 @@ const confirmUserNameService = errorUtilities.withErrorHandling(
   async (userName: string) => {
     const confirmUserName = await userRepositories.userRepositories.getOne(
       { userName },
-      ["userName"]
+      [DatabaseConstants.DatabaseProjection.USERNAME]
     );
 
     if (confirmUserName) {
       throw errorUtilities.createError(
-        "Username unavailable, please choose another username",
-        400
+        UserResponses.UNAVAILABLE_USER_NAME,
+        StatusCodes.StatusCodes.BAD_REQUEST
       );
     }
     return handleServicesResponse.handleServicesResponse(
-      200,
-      "Username Available"
+      StatusCodes.StatusCodes.OK,
+      UserResponses.AVAILABLE_USERNAME
     );
   }
 );
 
 const userSwitchesToHostService = errorUtilities.withErrorHandling(
   async (userPayload: Record<string, any>): Promise<Record<string, any>> => {
-    const responseHandler: ResponseDetails = {
-      statusCode: 0,
-      message: "",
-      data: {},
-      details: {},
-      info: {},
-    };
 
-    return responseHandler;
+    return handleServicesResponse.handleServicesResponse(
+      StatusCodes.StatusCodes.OK,
+      UserResponses.AVAILABLE_USERNAME
+    );;
   }
 );
 
 const getAllLiveEventsService = errorUtilities.withErrorHandling(
   async (): Promise<Record<string, any>> => {
-
     const projection = [
-      'id',
-      'eventTitle',
-      'ownerName',
-      'coverImage',
-      'isLive'
-    ]
-    const events: any = await eventRepositories.eventRepositories.getMany({
-      // isLive: true,
-    }, projection);
+      DatabaseConstants.DatabaseProjection.ID,
+      DatabaseConstants.DatabaseProjection.EVENT_TITLE,
+      DatabaseConstants.DatabaseProjection.EVENT_OWNER_NAME,
+      DatabaseConstants.DatabaseProjection.EVENT_COVER_IMAGE,
+      DatabaseConstants.DatabaseProjection.EVENT_IS_LIVE,
+    ];
+    const events: any = await eventRepositories.eventRepositories.getMany(
+      {
+        // isLive: true,
+      },
+      projection
+    );
 
     if (!events) {
-      throw errorUtilities.createError("Unable to fetch Events", 404);
+      throw errorUtilities.createError(
+        UserResponses.UNABLE_TO_FETCH_EVENTS,
+        StatusCodes.StatusCodes.NOT_FOUND
+      );
     }
     return handleServicesResponse.handleServicesResponse(
-      200,
-      "Live Events fetched successfully",
+      StatusCodes.StatusCodes.OK,
+      UserResponses.LIVE_EVENTS_FETCHED_SUCCESSFULLY,
       events
     );
   }
 );
 
 const getNewEvents = errorUtilities.withErrorHandling(async () => {
-
   const projection = [
-    'id',
-    'eventTitle',
-    'ownerName',
-    'coverImage',
-    'isLive'
-  ]
+    DatabaseConstants.DatabaseProjection.ID,
+    DatabaseConstants.DatabaseProjection.EVENT_TITLE,
+    DatabaseConstants.DatabaseProjection.EVENT_OWNER_NAME,
+    DatabaseConstants.DatabaseProjection.EVENT_COVER_IMAGE,
+    DatabaseConstants.DatabaseProjection.EVENT_IS_LIVE,
+  ];
 
   const events = await eventRepositories.eventRepositories.getMany(
     {},
     projection,
     {},
-    [["createdAt", "DESC"]]
+    [
+      [
+        DatabaseConstants.DatabaseProjection.CREATED_AT,
+        DatabaseConstants.DatabaseCadre.DESC,
+      ],
+    ]
   );
   if (!events) {
-    throw errorUtilities.createError("Unable to fetch Events", 404);
+    throw errorUtilities.createError(
+      UserResponses.UNABLE_TO_FETCH_EVENTS,
+      StatusCodes.StatusCodes.NOT_FOUND
+    );
   }
   return handleServicesResponse.handleServicesResponse(
-    200,
-    "New Events fetched successfully",
+    StatusCodes.StatusCodes.OK,
+    UserResponses.NEW_EVENTS_FETCHED_SUCCESSFULLY,
     events
   );
 });
 
 const getDiscoverEvents = errorUtilities.withErrorHandling(
   async (userId: string) => {
-
     const user = (await userRepositories.userRepositories.getOne(
       { id: userId },
-      ["interests", "id"]
+      [DatabaseConstants.DatabaseProjection.INTERESTS, DatabaseConstants.DatabaseProjection.ID]
     )) as unknown as UserAttributes;
 
     const events = await eventRepositories.eventRepositories.getMany({
@@ -318,93 +327,101 @@ const getDiscoverEvents = errorUtilities.withErrorHandling(
     });
 
     if (!events) {
-      throw errorUtilities.createError("Unable to fetch Events", 404);
+      throw errorUtilities.createError(
+        UserResponses.UNABLE_TO_FETCH_EVENTS,
+        StatusCodes.StatusCodes.NOT_FOUND
+      );
     }
 
     return handleServicesResponse.handleServicesResponse(
-      200,
-      "Events fetched successfully",
+      StatusCodes.StatusCodes.OK,
+      UserResponses.EVENTS_FETCHED_SUCCESSFULLY,
       events
     );
-
   }
 );
 
 const getRecordedEvents = errorUtilities.withErrorHandling(async () => {
-
   const projection = [
-    'id',
-    'eventTitle',
-    'ownerName',
-    'coverImage',
-    'isLive'
-  ]
+    DatabaseConstants.DatabaseProjection.ID,
+    DatabaseConstants.DatabaseProjection.EVENT_TITLE,
+    DatabaseConstants.DatabaseProjection.EVENT_OWNER_NAME,
+    DatabaseConstants.DatabaseProjection.EVENT_COVER_IMAGE,
+    DatabaseConstants.DatabaseProjection.EVENT_IS_LIVE,
+  ];
 
-  const events = await eventRepositories.eventRepositories.getMany({
-    isRecorded: true,
-  }, projection);
+  const events = await eventRepositories.eventRepositories.getMany(
+    {
+      isRecorded: true,
+    },
+    projection
+  );
 
   if (!events) {
-    throw errorUtilities.createError("Unable to fetch Events", 404);
+    throw errorUtilities.createError(
+      UserResponses.UNABLE_TO_FETCH_EVENTS,
+      StatusCodes.StatusCodes.NOT_FOUND
+    );
   }
 
   return handleServicesResponse.handleServicesResponse(
-    200,
-    "Recorded Events fetched successfully",
+    StatusCodes.StatusCodes.OK,
+    UserResponses.RECORDED_EVENTS_FETCHED_SUCCESSFULLY,
     events
   );
-
 });
 
 const getAllEvents = errorUtilities.withErrorHandling(async () => {
-
   const events = await eventRepositories.eventRepositories.getMany({});
 
   if (!events) {
-    throw errorUtilities.createError("Unable to fetch Events", 404);
+    throw errorUtilities.createError(
+      UserResponses.UNABLE_TO_FETCH_EVENTS,
+      StatusCodes.StatusCodes.NOT_FOUND
+    );
   }
 
   return handleServicesResponse.handleServicesResponse(
-    200,
-    "All Events fetched successfully",
+    StatusCodes.StatusCodes.OK,
+    UserResponses.EVENTS_FETCHED_SUCCESSFULLY,
     events
   );
-
 });
 
-const getTrendingEvents = errorUtilities.withErrorHandling(
-  async () => {
+const getTrendingEvents = errorUtilities.withErrorHandling(async () => {
+  const projection = [
+    DatabaseConstants.DatabaseProjection.ID,
+    DatabaseConstants.DatabaseProjection.EVENT_TITLE,
+    DatabaseConstants.DatabaseProjection.EVENT_OWNER_NAME,
+    DatabaseConstants.DatabaseProjection.EVENT_COVER_IMAGE,
+    DatabaseConstants.DatabaseProjection.EVENT_IS_LIVE,
+  ];
 
-    const projection = [
-      'id',
-      'eventTitle',
-      'ownerName',
-      'coverImage',
-      'isLive'
+  const events = await eventRepositories.eventRepositories.getMany(
+    {},
+    projection,
+    {},
+    [
+      [
+        DatabaseConstants.DatabaseProjection.EVENT_NO_OF_LIKES,
+        DatabaseConstants.DatabaseCadre.DESC,
+      ],
     ]
+  );
 
-    const events = await eventRepositories.eventRepositories.getMany(
-      {},
-      projection,
-      {},
-      [["noOfLikes", "DESC"]]
+  if (!events) {
+    throw errorUtilities.createError(
+      UserResponses.UNABLE_TO_FETCH_EVENTS,
+      StatusCodes.StatusCodes.NOT_FOUND
     );
-
-    if (!events)
-      return handleServicesResponse.handleServicesResponse(
-        404,
-        "Unable to fetch events",
-        null
-      );
-
-    return handleServicesResponse.handleServicesResponse(
-      200,
-      "Trending Events fetched successfully",
-      events
-    );
-    
   }
-);
+
+  return handleServicesResponse.handleServicesResponse(
+    StatusCodes.StatusCodes.OK,
+    UserResponses.TRENDING_EVENTS_FETCHED_SUCCESSFULLY,
+    events
+  );
+});
 
 export default {
   userProfileUpdateService,

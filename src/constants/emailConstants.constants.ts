@@ -1,4 +1,3 @@
-
 enum MailSubjects {
   OTP = "Eventyzze OTP",
   WELCOME = "Welcome to Eventyzze",
@@ -7,7 +6,7 @@ enum MailSubjects {
   EVENT_CREATION = "Eventyzze Event Creation",
   TRANSACTION = "Transaction",
   PASSWORD_RESET_REQUEST = "Password Reset Request",
-  SUCCESSFUL_PASSWORD_RESET = "Password Reset Successful"
+  SUCCESSFUL_PASSWORD_RESET = "Password Reset Successful",
 }
 
 const generateMessages = () => {
@@ -35,21 +34,30 @@ const generateMessages = () => {
       There was a login to your account on ${date} by ${time}.<br /><br /> If you did not initiate this login, contact our support team to restrict your account. If it was you, please ignore.`;
     },
     EVENT_CREATION: (userName: string) => {
-        return `Hello ${userName}, your event has been created, please do not forget to join on the selected date`
+      return `Hello ${userName}, your event has been created, please do not forget to join on the selected date`;
     },
-    REFUND_TRANSACTION_DESCRIPTION: (event_title:string) => {
-        return `Refund from ${event_title} cancellation`
+    REFUND_TRANSACTION_DESCRIPTION: (event_title: string) => {
+      return `Refund from ${event_title} cancellation`;
     },
-    PASSWORD_RESET_OTP: (otp:string) => {
-        return `Your password reset OTP is ${otp}. It expires in 5 minutes.`
+    PASSWORD_RESET_OTP: (otp: string) => {
+      return `Your password reset OTP is ${otp}. It expires in 5 minutes.`;
     },
     PASSWORD_RESET_SUCCESSFUL: () => {
-        return `Your password has been reset successfully.`
-    }
+      return `Your password has been reset successfully.`;
+    },
+    FIRST_PROFILE_UPDATE_SUCCESSFUL: (fullName: string) => {
+      return `Welcome to Eventyzze ${fullName ? fullName : ""}! <br /><br />
+
+          We're excited to have you on board. Eventyzze is your go-to platform for discovering, organizing, and sharing amazing events. Whether you're attending or hosting, we're here to make your experience seamless and enjoyable. <br /> <br />
+
+          If you have any questions or need help getting started, feel free to reach out to our support team. We're always here to assist you. <br /> <br />
+
+          Let's make some unforgettable moments together!`;
+    },
   };
 };
 
 export default {
-    MailSubjects,
+  MailSubjects,
   generateMessages,
 };

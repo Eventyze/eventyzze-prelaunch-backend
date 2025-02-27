@@ -46,7 +46,16 @@ const generateMessages = () => {
         },
         PASSWORD_RESET_SUCCESSFUL: () => {
             return `Your password has been reset successfully.`;
-        }
+        },
+        FIRST_PROFILE_UPDATE_SUCCESSFUL: (fullName) => {
+            return `Welcome to Eventyzze ${fullName ? fullName : ""}! <br /><br />
+
+          We're excited to have you on board. Eventyzze is your go-to platform for discovering, organizing, and sharing amazing events. Whether you're attending or hosting, we're here to make your experience seamless and enjoyable. <br /> <br />
+
+          If you have any questions or need help getting started, feel free to reach out to our support team. We're always here to assist you. <br /> <br />
+
+          Let's make some unforgettable moments together!`;
+        },
     };
 };
 exports.default = {
