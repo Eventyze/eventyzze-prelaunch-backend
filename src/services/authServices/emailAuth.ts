@@ -14,7 +14,7 @@ import {
   folowersRepositories,
   otpRepositories,
 } from "../../repositories";
-import { EmailAuthResponses } from "../../types/responseTypes/responses";
+import { EmailAuthResponses } from "../../types/responseTypes/emailAuthResponses";
 
 const userRegisterWithEmailService = errorUtilities.withErrorHandling(
   async (userPayload: Record<string, any>): Promise<Record<string, any>> => {
