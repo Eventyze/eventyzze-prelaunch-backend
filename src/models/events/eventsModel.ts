@@ -60,6 +60,36 @@ Events.init(
         defaultValue: 0
       },
 
+      early_birds: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+      },
+
+      early_birds_discount: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: null
+      },
+
+      early_birds_end_date: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null
+      },
+
+      early_birds_start_date: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null
+      },
+
+      noOfViews: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+      },
+
       noOfDislikes: {
         type: DataTypes.INTEGER,
         allowNull: false,

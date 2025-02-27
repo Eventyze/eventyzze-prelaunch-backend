@@ -150,6 +150,11 @@ export interface EventAttributes {
     category: string[]
     isRecorded: boolean;
     ownerName: string;
+    early_birds: boolean;
+    early_birds_discount: number;
+    early_birds_end_date: Date;
+    early_birds_start_date: Date;
+    noOfViews: number;
 }
 
 export interface DyteDetials {
