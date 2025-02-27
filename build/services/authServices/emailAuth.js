@@ -11,7 +11,6 @@ const uuid_1 = require("uuid");
 const databaseTransactions_middleware_1 = __importDefault(require("../../middlewares/databaseTransactions.middleware"));
 const repositories_1 = require("../../repositories");
 const emailAuthResponses_1 = require("../../types/responseTypes/emailAuthResponses");
-// import { StatusCodes } from '../../constants/statusCodes.constants';
 const constants_1 = require("../../constants");
 const response_utilities_1 = __importDefault(require("../../utilities/responseHandlers/response.utilities"));
 const userRegisterWithEmailService = utilities_1.errorUtilities.withErrorHandling(async (userPayload) => {
@@ -86,7 +85,7 @@ const userRegisterWithEmailService = utilities_1.errorUtilities.withErrorHandlin
     const user = await repositories_1.userRepositories.userRepositories.getOne({
         id: userId,
     });
-    await utilities_1.mailUtilities.sendMail(email, constants_1.EmailConstants.generateAuthMailMessages().OTP(otp), constants_1.EmailConstants.EmailAuthMailSubjects.OTP);
+    await utilities_1.mailUtilities.sendMail(email, constants_1.EmailConstants.generateMessages().OTP(otp), constants_1.EmailConstants.MailSubjects.OTP);
     return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.CREATED, emailAuthResponses_1.EmailAuthResponses.SUCCESFUL_CREATION, user);
 });
 const userVerifiesOtp = utilities_1.errorUtilities.withErrorHandling(async (userPayload) => {
@@ -126,7 +125,7 @@ const userVerifiesOtp = utilities_1.errorUtilities.withErrorHandling(async (user
     const mainUser = await repositories_1.userRepositories.userRepositories.getOne({
         email,
     });
-    await utilities_1.mailUtilities.sendMail(mainUser.email, constants_1.EmailConstants.generateAuthMailMessages().ACCOUNT_VERIFIED(), constants_1.EmailConstants.EmailAuthMailSubjects.ACCOUNT);
+    await utilities_1.mailUtilities.sendMail(mainUser.email, constants_1.EmailConstants.generateMessages().ACCOUNT_VERIFIED(), constants_1.EmailConstants.MailSubjects.ACCOUNT);
     return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.OK, emailAuthResponses_1.EmailAuthResponses.VERIFIED_ACCOUNT, { user: mainUser, accessToken, refreshToken });
 });
 const userLogin = utilities_1.errorUtilities.withErrorHandling(async (loginPayload) => {
@@ -176,12 +175,12 @@ const userLogin = utilities_1.errorUtilities.withErrorHandling(async (loginPaylo
     let mailSubject = "";
     const dateDetails = helpers_1.generalHelpers.dateFormatter(new Date());
     if (!existingUser.refreshToken || !existingUser.isInitialProfileSetupDone) {
-        mailMessage = `${constants_1.EmailConstants.EmailAuthMailSubjects.WELCOME} ${existingUser.fullName ? existingUser.fullName : ""}! ${constants_1.EmailConstants.generateAuthMailMessages().NEW_USER_LOGIN()}`;
-        mailSubject = `${constants_1.EmailConstants.EmailAuthMailSubjects.WELCOME} ${existingUser.fullName ? existingUser.fullName : ""}`;
+        mailMessage = `${constants_1.EmailConstants.MailSubjects.WELCOME} ${existingUser.fullName ? existingUser.fullName : ""}! ${constants_1.EmailConstants.generateMessages().NEW_USER_LOGIN()}`;
+        mailSubject = `${constants_1.EmailConstants.MailSubjects.WELCOME} ${existingUser.fullName ? existingUser.fullName : ""}`;
     }
     else {
-        mailSubject = constants_1.EmailConstants.EmailAuthMailSubjects.LOGIN_ACTIVITY;
-        mailMessage = constants_1.EmailConstants.generateAuthMailMessages().EXISTING_USER_LOGIN(existingUser.fullName, dateDetails.date, dateDetails.time);
+        mailSubject = constants_1.EmailConstants.MailSubjects.LOGIN_ACTIVITY;
+        mailMessage = constants_1.EmailConstants.generateMessages().EXISTING_USER_LOGIN(existingUser.fullName, dateDetails.date, dateDetails.time);
     }
     existingUser.refreshToken = refreshToken;
     existingUser.activeDeviceId = deviceId;
@@ -202,7 +201,7 @@ const userResendsOtpService = utilities_1.errorUtilities.withErrorHandling(async
     }
     const otpDetails = user.otp;
     if (new Date(otpDetails.expiresAt) > new Date()) {
-        await utilities_1.mailUtilities.sendMail(email, constants_1.EmailConstants.generateAuthMailMessages().OTP(otpDetails.otp), constants_1.EmailConstants.EmailAuthMailSubjects.OTP);
+        await utilities_1.mailUtilities.sendMail(email, constants_1.EmailConstants.generateMessages().OTP(otpDetails.otp), constants_1.EmailConstants.MailSubjects.OTP);
         return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.OK, emailAuthResponses_1.EmailAuthResponses.OTP_RESENT);
     }
     const { otp, expiresAt } = await helpers_1.generalHelpers.generateOtp();
@@ -230,7 +229,7 @@ const userResendsOtpService = utilities_1.errorUtilities.withErrorHandling(async
         },
     ];
     await databaseTransactions_middleware_1.default.performTransaction(operations);
-    await utilities_1.mailUtilities.sendMail(email, constants_1.EmailConstants.generateAuthMailMessages().OTP(otp), constants_1.EmailConstants.EmailAuthMailSubjects.OTP);
+    await utilities_1.mailUtilities.sendMail(email, constants_1.EmailConstants.generateMessages().OTP(otp), constants_1.EmailConstants.MailSubjects.OTP);
     return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.OK, emailAuthResponses_1.EmailAuthResponses.OTP_RESENT);
 });
 const userLogoutService = utilities_1.errorUtilities.withErrorHandling(async (logoutPayload) => {

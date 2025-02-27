@@ -5,21 +5,18 @@ import { v4 } from "uuid";
 import { userRepositories, otpRepositories } from "../../repositories";
 import performTransaction from "../../middlewares/databaseTransactions.middleware";
 import { Transaction } from "sequelize";
+import { UserResponses } from "../../types/responseTypes/userServiceResponses";
+import { DatabaseConstants, EmailConstants, StatusCodes } from "../../constants";
+import handleServicesResponse from "../../utilities/responseHandlers/response.utilities";
+
 
 const requestPasswordReset = errorUtilities.withErrorHandling(
   async (email: string): Promise<Record<string, any>> => {
-    const responseHandler: ResponseDetails = {
-      statusCode: 0,
-      message: "",
-      data: {},
-      details: {},
-      info: {},
-    };
 
     const user:any = await userRepositories.userRepositories.getOne({ email });
 
     if (!user) {
-      throw errorUtilities.createError("User not found", 404);
+      throw errorUtilities.createError(UserResponses.NOT_FOUND, StatusCodes.StatusCodes.NOT_FOUND);
     }
 
     const { otp, expiresAt } = await generalHelpers.generateOtp();
@@ -58,35 +55,26 @@ const requestPasswordReset = errorUtilities.withErrorHandling(
 
     await mailUtilities.sendMail(
       email,
-      `Your password reset OTP is ${otp}. It expires in 5 minutes.`,
-      "Password Reset Request"
+      EmailConstants.generateMessages().PASSWORD_RESET_OTP(otp),
+      EmailConstants.MailSubjects.PASSWORD_RESET_REQUEST
     );
 
-    responseHandler.statusCode = 200;
-    responseHandler.message = "Password reset OTP has been sent to your email";
-    return responseHandler;
+    return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.OK, UserResponses.PASSWORD_RESET_OTP)
   }
 );
 
 const resetPassword = errorUtilities.withErrorHandling(
   async (resetPayload: Record<string, any>): Promise<Record<string, any>> => {
-    const responseHandler: ResponseDetails = {
-      statusCode: 0,
-      message: "",
-      data: {},
-      details: {},
-      info: {},
-    };
 
     const { email, otp, newPassword } = resetPayload;
 
     const user: any = await userRepositories.userRepositories.getOne(
       { email },
-      ["otp", "id"]
+      [DatabaseConstants.DatabaseProjection.OTP, DatabaseConstants.DatabaseProjection.ID]
     );
 
     if (!user) {
-      throw errorUtilities.createError("User not found", 404);
+      throw errorUtilities.createError(UserResponses.NOT_FOUND, StatusCodes.StatusCodes.NOT_FOUND);
     }
 
     const otpFinder: any = await otpRepositories.otpRpositories.getOne({
@@ -96,15 +84,15 @@ const resetPassword = errorUtilities.withErrorHandling(
 
     if (!otpFinder || otpFinder.used) {
       throw errorUtilities.createError(
-        "Invalid OTP. Please try again or request a new OTP",
-        400
+        UserResponses.INVALID_OTP,
+        StatusCodes.StatusCodes.BAD_REQUEST
       );
     }
 
     const verify = await generalHelpers.verifyOtp(otpFinder);
 
     if (!verify) {
-      throw errorUtilities.createError("OTP expired. Please request a new OTP", 400);
+      throw errorUtilities.createError(UserResponses.EXPIRED_OTP, StatusCodes.StatusCodes.BAD_REQUEST);
     }
 
     const hashedPassword = await generalHelpers.hashPassword(newPassword);
@@ -130,15 +118,14 @@ const resetPassword = errorUtilities.withErrorHandling(
 
     await mailUtilities.sendMail(
       email,
-      "Your password has been reset successfully.",
-      "Password Reset Successful"
+      EmailConstants.generateMessages().PASSWORD_RESET_SUCCESSFUL(),
+      EmailConstants.MailSubjects.SUCCESSFUL_PASSWORD_RESET
     );
 
-    responseHandler.statusCode = 200;
-    responseHandler.message = "Password reset successful";
-    return responseHandler;
+    return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.OK, UserResponses.PASSWORD_RESET_SUCCESSFUL)
   }
 );
+
 
 export default {
   requestPasswordReset,

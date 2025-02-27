@@ -1,14 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var EmailAuthMailSubjects;
-(function (EmailAuthMailSubjects) {
-    EmailAuthMailSubjects["OTP"] = "Eventyzze OTP";
-    EmailAuthMailSubjects["WELCOME"] = "Welcome to Eventyzze";
-    EmailAuthMailSubjects["ACCOUNT"] = "Account Verification";
-    EmailAuthMailSubjects["LOGIN_ACTIVITY"] = "Activity Detected on Your Account";
-    EmailAuthMailSubjects["EVENT_CREATION"] = "Eventyzze Event Creation";
-})(EmailAuthMailSubjects || (EmailAuthMailSubjects = {}));
-const generateAuthMailMessages = () => {
+var MailSubjects;
+(function (MailSubjects) {
+    MailSubjects["OTP"] = "Eventyzze OTP";
+    MailSubjects["WELCOME"] = "Welcome to Eventyzze";
+    MailSubjects["ACCOUNT"] = "Account Verification";
+    MailSubjects["LOGIN_ACTIVITY"] = "Activity Detected on Your Account";
+    MailSubjects["EVENT_CREATION"] = "Eventyzze Event Creation";
+    MailSubjects["TRANSACTION"] = "Transaction";
+    MailSubjects["PASSWORD_RESET_REQUEST"] = "Password Reset Request";
+    MailSubjects["SUCCESSFUL_PASSWORD_RESET"] = "Password Reset Successful";
+})(MailSubjects || (MailSubjects = {}));
+const generateMessages = () => {
     return {
         OTP: (otp) => {
             return `Welcome to Eventyzze, your OTP is ${otp}, it expires in 5 minutes`;
@@ -34,10 +37,19 @@ const generateAuthMailMessages = () => {
         },
         EVENT_CREATION: (userName) => {
             return `Hello ${userName}, your event has been created, please do not forget to join on the selected date`;
+        },
+        REFUND_TRANSACTION_DESCRIPTION: (event_title) => {
+            return `Refund from ${event_title} cancellation`;
+        },
+        PASSWORD_RESET_OTP: (otp) => {
+            return `Your password reset OTP is ${otp}. It expires in 5 minutes.`;
+        },
+        PASSWORD_RESET_SUCCESSFUL: () => {
+            return `Your password has been reset successfully.`;
         }
     };
 };
 exports.default = {
-    EmailAuthMailSubjects,
-    generateAuthMailMessages,
+    MailSubjects,
+    generateMessages,
 };

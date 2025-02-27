@@ -15,7 +15,6 @@ import {
   otpRepositories,
 } from "../../repositories";
 import { EmailAuthResponses } from "../../types/responseTypes/emailAuthResponses";
-// import { StatusCodes } from '../../constants/statusCodes.constants';
 import { StatusCodes, EmailConstants, DatabaseConstants } from "../../constants";
 import handleServicesResponse from "../../utilities/responseHandlers/response.utilities";
 
@@ -130,8 +129,8 @@ const userRegisterWithEmailService = errorUtilities.withErrorHandling(
 
     await mailUtilities.sendMail(
       email,
-      EmailConstants.generateAuthMailMessages().OTP(otp),
-      EmailConstants.EmailAuthMailSubjects.OTP
+      EmailConstants.generateMessages().OTP(otp),
+      EmailConstants.MailSubjects.OTP
     );
 
     return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.CREATED, EmailAuthResponses.SUCCESFUL_CREATION, user);
@@ -207,8 +206,8 @@ const userVerifiesOtp = errorUtilities.withErrorHandling(
 
     await mailUtilities.sendMail(
       mainUser.email,
-      EmailConstants.generateAuthMailMessages().ACCOUNT_VERIFIED(),
-      EmailConstants.EmailAuthMailSubjects.ACCOUNT
+      EmailConstants.generateMessages().ACCOUNT_VERIFIED(),
+      EmailConstants.MailSubjects.ACCOUNT
     );
 
     return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.OK, EmailAuthResponses.VERIFIED_ACCOUNT, { user: mainUser, accessToken, refreshToken });
@@ -294,16 +293,16 @@ const userLogin = errorUtilities.withErrorHandling(
     const dateDetails = generalHelpers.dateFormatter(new Date());
 
     if (!existingUser.refreshToken || !existingUser.isInitialProfileSetupDone) {
-      mailMessage = `${EmailConstants.EmailAuthMailSubjects.WELCOME} ${
+      mailMessage = `${EmailConstants.MailSubjects.WELCOME} ${
         existingUser.fullName ? existingUser.fullName : ""
-      }! ${EmailConstants.generateAuthMailMessages().NEW_USER_LOGIN()}`;
+      }! ${EmailConstants.generateMessages().NEW_USER_LOGIN()}`;
 
-      mailSubject = `${EmailConstants.EmailAuthMailSubjects.WELCOME} ${
+      mailSubject = `${EmailConstants.MailSubjects.WELCOME} ${
         existingUser.fullName ? existingUser.fullName : ""
       }`;
     } else {
-      mailSubject = EmailConstants.EmailAuthMailSubjects.LOGIN_ACTIVITY;
-      mailMessage = EmailConstants.generateAuthMailMessages().EXISTING_USER_LOGIN(existingUser.fullName, dateDetails.date, dateDetails.time);
+      mailSubject = EmailConstants.MailSubjects.LOGIN_ACTIVITY;
+      mailMessage = EmailConstants.generateMessages().EXISTING_USER_LOGIN(existingUser.fullName, dateDetails.date, dateDetails.time);
     }
 
     existingUser.refreshToken = refreshToken;
@@ -347,8 +346,8 @@ const userResendsOtpService = errorUtilities.withErrorHandling(
     if (new Date(otpDetails.expiresAt) > new Date()) {
       await mailUtilities.sendMail(
         email,
-        EmailConstants.generateAuthMailMessages().OTP(otpDetails.otp),
-        EmailConstants.EmailAuthMailSubjects.OTP
+        EmailConstants.generateMessages().OTP(otpDetails.otp),
+        EmailConstants.MailSubjects.OTP
       );
 
       return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.OK, EmailAuthResponses.OTP_RESENT);
@@ -392,8 +391,8 @@ const userResendsOtpService = errorUtilities.withErrorHandling(
 
     await mailUtilities.sendMail(
       email,
-      EmailConstants.generateAuthMailMessages().OTP(otp),
-      EmailConstants.EmailAuthMailSubjects.OTP
+      EmailConstants.generateMessages().OTP(otp),
+      EmailConstants.MailSubjects.OTP
     );
 
     return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.OK, EmailAuthResponses.OTP_RESENT);

@@ -28,7 +28,7 @@ import { dyteHelpers, generalHelpers } from "../../helpers";
 import performTransaction from "../../middlewares/databaseTransactions.middleware";
 import { dyteServices } from "../../services";
 import handleServicesResponse from "../../utilities/responseHandlers/response.utilities";
-import { DatabaseConstants, EmailConstants, StatusCodes } from "../../constants";
+import { DatabaseConstants, EmailConstants, StatusCodes, TransactionConstants } from "../../constants";
 import { HostServiceResponses } from '../../types/responseTypes/hostServiceResponses'
 
 const getAllHostsService = errorUtilities.withErrorHandling(
@@ -213,8 +213,8 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
 
     await mailUtilities.sendMail(
       user.email,
-      EmailConstants.generateAuthMailMessages().EVENT_CREATION(user.userName),
-      EmailConstants.EmailAuthMailSubjects.EVENT_CREATION
+      EmailConstants.generateMessages().EVENT_CREATION(user.userName),
+      EmailConstants.MailSubjects.EVENT_CREATION
     );
 
     return handleServicesResponse.handleServicesResponse(
@@ -227,99 +227,59 @@ const hostCreatesEventService = errorUtilities.withErrorHandling(
 
 const hostgetsAllTheirEventsService = errorUtilities.withErrorHandling(
   async (userId: string): Promise<Record<string, any>> => {
-    const responseHandler: ResponseDetails = {
-      statusCode: 0,
-      message: "",
-      data: {},
-      details: {},
-      info: {},
-    };
 
     const user = await userRepositories.userRepositories.getOne({ id: userId });
 
     if (!user) {
-      responseHandler.message = "User not found";
-      responseHandler.statusCode = 404;
-      return responseHandler;
+      return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.NOT_FOUND, HostServiceResponses.NOT_FOUND)
     }
 
     const userEvents = await eventRepositories.eventRepositories.getMany({
       userId,
     });
 
-    responseHandler.message = "Events fetched successfully";
-    responseHandler.statusCode = 200;
-    responseHandler.data = { events: userEvents };
-    return responseHandler;
+    return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.OK, HostServiceResponses.SUCCESSFUL, { events: userEvents })
   }
 );
 
 const hostGetsSingleEventService = errorUtilities.withErrorHandling(
   async (userId: string, eventId: string): Promise<Record<string, any>> => {
-    const responseHandler: ResponseDetails = {
-      statusCode: 0,
-      message: "",
-      data: {},
-      details: {},
-      info: {},
-    };
 
     const user = await userRepositories.userRepositories.getOne({ id: userId });
 
     if (!user) {
-      responseHandler.message = "User not found";
-      responseHandler.statusCode = 404;
-      return responseHandler;
+      return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.NOT_FOUND, HostServiceResponses.NOT_FOUND)
     }
 
     const singleEvent = await eventRepositories.eventRepositories.getOne({
       userId,
     });
 
-    responseHandler.message = "Event fetched successfully";
-    responseHandler.statusCode = 200;
-    responseHandler.data = { event: singleEvent };
-    return responseHandler;
+    return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.OK, HostServiceResponses.SUCCESSFUL, { event: singleEvent })
   }
 );
 
 const hostDeletesEvent = errorUtilities.withErrorHandling(
   async (userId: string, eventId: string): Promise<Record<string, any>> => {
-    const responseHandler: ResponseDetails = {
-      statusCode: 0,
-      message: "",
-      data: {},
-      details: {},
-      info: {},
-    };
 
     const user = await userRepositories.userRepositories.getOne({ id: userId });
     if (!user) {
-      responseHandler.message = "User not found";
-      responseHandler.statusCode = 404;
-      return responseHandler;
+      return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.NOT_FOUND, HostServiceResponses.NOT_FOUND)
     }
 
     const event = (await eventRepositories.eventRepositories.getOne({
       id: eventId,
     })) as unknown as EventAttributes;
     if (!event) {
-      responseHandler.message = "Event not found";
-      responseHandler.statusCode = 404;
-      return responseHandler;
+      return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.NOT_FOUND, HostServiceResponses.EVENT_NOT_FOUND)
     }
 
     if (event.userId !== userId) {
-      responseHandler.message = "You cannot delete an event you did not create";
-      responseHandler.statusCode = 400;
-      return responseHandler;
+      return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.BAD_REQUEST, HostServiceResponses.UNABLE_TO_DELETE_UNOWNED_EVENT)
     }
 
     if (event.isLive) {
-      responseHandler.message =
-        "You cannot delete an event that is still ongoing. End the event first please";
-      responseHandler.statusCode = 400;
-      return responseHandler;
+      return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.BAD_REQUEST, HostServiceResponses.UNABLE_TO_DELETE_LIVE_EVENT)
     }
 
     const attendees: any =
@@ -359,12 +319,12 @@ const hostDeletesEvent = errorUtilities.withErrorHandling(
                 id: v4(),
                 userUUId: attendee.userId,
                 amount: eventCost,
-                type: "credit",
-                status: "completed",
+                type: TransactionConstants.TransactionType.CREDIT,
+                status: TransactionConstants.TransactionStatus.COMPLETED,
                 date: new Date(),
                 reference: transactionReference,
                 userEventyzzeId: attendee.eventyzzeId,
-                description: `Refund from ${event.eventTitle} cancellation`,
+                description: EmailConstants.generateMessages().REFUND_TRANSACTION_DESCRIPTION(event.eventTitle),
               },
               transaction
             );
@@ -383,18 +343,18 @@ const hostDeletesEvent = errorUtilities.withErrorHandling(
         const transactionReceipt = recieptUtilities({
           reference: transactionReference,
           amount: eventCost,
-          type: "credit",
-          status: "completed",
+          type: TransactionConstants.TransactionType.CREDIT,
+          status: TransactionConstants.TransactionStatus.COMPLETED,
           date: new Date(),
           userEventyzzeId: "",
-          description: `Refund from ${event.eventTitle} cancellation`,
+          description: EmailConstants.generateMessages().REFUND_TRANSACTION_DESCRIPTION(event.eventTitle),
         });
 
         try {
           await mailUtilities.sendMail(
             attendee.email,
             transactionReceipt,
-            "Transaction"
+            EmailConstants.MailSubjects.TRANSACTION
           );
         } catch (error: any) {
           console.log("delete event error:", error.message);
@@ -402,16 +362,11 @@ const hostDeletesEvent = errorUtilities.withErrorHandling(
       }
 
       await eventRepositories.eventRepositories.deleteOne({ id: eventId });
-      responseHandler.message =
-        "Event deleted and refunds processed successfully";
-      responseHandler.statusCode = 200;
-      return responseHandler;
+      return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.OK, HostServiceResponses.EVENT_DELETE_WITH_REFUNDS)
     }
 
     await eventRepositories.eventRepositories.deleteOne({ id: eventId });
-    responseHandler.message = "Event deleted successfully";
-    responseHandler.statusCode = 200;
-    return responseHandler;
+    return handleServicesResponse.handleServicesResponse(StatusCodes.StatusCodes.OK, HostServiceResponses.EVENT_DELETED_NO_REFUNDS)
   }
 );
 

@@ -125,85 +125,45 @@ const hostCreatesEventService = utilities_1.errorUtilities.withErrorHandling(asy
     const newEvent = await repositories_1.eventRepositories.eventRepositories.getOne({
         id: eventId,
     });
-    await utilities_1.mailUtilities.sendMail(user.email, constants_1.EmailConstants.generateAuthMailMessages().EVENT_CREATION(user.userName), constants_1.EmailConstants.EmailAuthMailSubjects.EVENT_CREATION);
+    await utilities_1.mailUtilities.sendMail(user.email, constants_1.EmailConstants.generateMessages().EVENT_CREATION(user.userName), constants_1.EmailConstants.MailSubjects.EVENT_CREATION);
     return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.CREATED, hostServiceResponses_1.HostServiceResponses.SUCCESSFUL_CREATION, newEvent);
 });
 const hostgetsAllTheirEventsService = utilities_1.errorUtilities.withErrorHandling(async (userId) => {
-    const responseHandler = {
-        statusCode: 0,
-        message: "",
-        data: {},
-        details: {},
-        info: {},
-    };
     const user = await repositories_1.userRepositories.userRepositories.getOne({ id: userId });
     if (!user) {
-        responseHandler.message = "User not found";
-        responseHandler.statusCode = 404;
-        return responseHandler;
+        return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.NOT_FOUND, hostServiceResponses_1.HostServiceResponses.NOT_FOUND);
     }
     const userEvents = await repositories_1.eventRepositories.eventRepositories.getMany({
         userId,
     });
-    responseHandler.message = "Events fetched successfully";
-    responseHandler.statusCode = 200;
-    responseHandler.data = { events: userEvents };
-    return responseHandler;
+    return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.OK, hostServiceResponses_1.HostServiceResponses.SUCCESSFUL, { events: userEvents });
 });
 const hostGetsSingleEventService = utilities_1.errorUtilities.withErrorHandling(async (userId, eventId) => {
-    const responseHandler = {
-        statusCode: 0,
-        message: "",
-        data: {},
-        details: {},
-        info: {},
-    };
     const user = await repositories_1.userRepositories.userRepositories.getOne({ id: userId });
     if (!user) {
-        responseHandler.message = "User not found";
-        responseHandler.statusCode = 404;
-        return responseHandler;
+        return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.NOT_FOUND, hostServiceResponses_1.HostServiceResponses.NOT_FOUND);
     }
     const singleEvent = await repositories_1.eventRepositories.eventRepositories.getOne({
         userId,
     });
-    responseHandler.message = "Event fetched successfully";
-    responseHandler.statusCode = 200;
-    responseHandler.data = { event: singleEvent };
-    return responseHandler;
+    return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.OK, hostServiceResponses_1.HostServiceResponses.SUCCESSFUL, { event: singleEvent });
 });
 const hostDeletesEvent = utilities_1.errorUtilities.withErrorHandling(async (userId, eventId) => {
-    const responseHandler = {
-        statusCode: 0,
-        message: "",
-        data: {},
-        details: {},
-        info: {},
-    };
     const user = await repositories_1.userRepositories.userRepositories.getOne({ id: userId });
     if (!user) {
-        responseHandler.message = "User not found";
-        responseHandler.statusCode = 404;
-        return responseHandler;
+        return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.NOT_FOUND, hostServiceResponses_1.HostServiceResponses.NOT_FOUND);
     }
     const event = (await repositories_1.eventRepositories.eventRepositories.getOne({
         id: eventId,
     }));
     if (!event) {
-        responseHandler.message = "Event not found";
-        responseHandler.statusCode = 404;
-        return responseHandler;
+        return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.NOT_FOUND, hostServiceResponses_1.HostServiceResponses.EVENT_NOT_FOUND);
     }
     if (event.userId !== userId) {
-        responseHandler.message = "You cannot delete an event you did not create";
-        responseHandler.statusCode = 400;
-        return responseHandler;
+        return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.BAD_REQUEST, hostServiceResponses_1.HostServiceResponses.UNABLE_TO_DELETE_UNOWNED_EVENT);
     }
     if (event.isLive) {
-        responseHandler.message =
-            "You cannot delete an event that is still ongoing. End the event first please";
-        responseHandler.statusCode = 400;
-        return responseHandler;
+        return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.BAD_REQUEST, hostServiceResponses_1.HostServiceResponses.UNABLE_TO_DELETE_LIVE_EVENT);
     }
     const attendees = (await repositories_1.attendanceRepositories.attendanceRepositories.getMany({
         eventId,
@@ -231,12 +191,12 @@ const hostDeletesEvent = utilities_1.errorUtilities.withErrorHandling(async (use
                         id: (0, uuid_1.v4)(),
                         userUUId: attendee.userId,
                         amount: eventCost,
-                        type: "credit",
-                        status: "completed",
+                        type: constants_1.TransactionConstants.TransactionType.CREDIT,
+                        status: constants_1.TransactionConstants.TransactionStatus.COMPLETED,
                         date: new Date(),
                         reference: transactionReference,
                         userEventyzzeId: attendee.eventyzzeId,
-                        description: `Refund from ${event.eventTitle} cancellation`,
+                        description: constants_1.EmailConstants.generateMessages().REFUND_TRANSACTION_DESCRIPTION(event.eventTitle),
                     }, transaction);
                 },
                 async (transaction) => {
@@ -247,29 +207,24 @@ const hostDeletesEvent = utilities_1.errorUtilities.withErrorHandling(async (use
             const transactionReceipt = (0, utilities_1.recieptUtilities)({
                 reference: transactionReference,
                 amount: eventCost,
-                type: "credit",
-                status: "completed",
+                type: constants_1.TransactionConstants.TransactionType.CREDIT,
+                status: constants_1.TransactionConstants.TransactionStatus.COMPLETED,
                 date: new Date(),
                 userEventyzzeId: "",
-                description: `Refund from ${event.eventTitle} cancellation`,
+                description: constants_1.EmailConstants.generateMessages().REFUND_TRANSACTION_DESCRIPTION(event.eventTitle),
             });
             try {
-                await utilities_1.mailUtilities.sendMail(attendee.email, transactionReceipt, "Transaction");
+                await utilities_1.mailUtilities.sendMail(attendee.email, transactionReceipt, constants_1.EmailConstants.MailSubjects.TRANSACTION);
             }
             catch (error) {
                 console.log("delete event error:", error.message);
             }
         }
         await repositories_1.eventRepositories.eventRepositories.deleteOne({ id: eventId });
-        responseHandler.message =
-            "Event deleted and refunds processed successfully";
-        responseHandler.statusCode = 200;
-        return responseHandler;
+        return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.OK, hostServiceResponses_1.HostServiceResponses.EVENT_DELETE_WITH_REFUNDS);
     }
     await repositories_1.eventRepositories.eventRepositories.deleteOne({ id: eventId });
-    responseHandler.message = "Event deleted successfully";
-    responseHandler.statusCode = 200;
-    return responseHandler;
+    return response_utilities_1.default.handleServicesResponse(constants_1.StatusCodes.StatusCodes.OK, hostServiceResponses_1.HostServiceResponses.EVENT_DELETED_NO_REFUNDS);
 });
 exports.default = {
     getAllHostsService,

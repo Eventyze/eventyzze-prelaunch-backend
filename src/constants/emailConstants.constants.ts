@@ -1,12 +1,16 @@
-enum EmailAuthMailSubjects {
+
+enum MailSubjects {
   OTP = "Eventyzze OTP",
   WELCOME = "Welcome to Eventyzze",
   ACCOUNT = "Account Verification",
   LOGIN_ACTIVITY = "Activity Detected on Your Account",
-  EVENT_CREATION = "Eventyzze Event Creation"
+  EVENT_CREATION = "Eventyzze Event Creation",
+  TRANSACTION = "Transaction",
+  PASSWORD_RESET_REQUEST = "Password Reset Request",
+  SUCCESSFUL_PASSWORD_RESET = "Password Reset Successful"
 }
 
-const generateAuthMailMessages = () => {
+const generateMessages = () => {
   return {
     OTP: (otp: string) => {
       return `Welcome to Eventyzze, your OTP is ${otp}, it expires in 5 minutes`;
@@ -32,11 +36,20 @@ const generateAuthMailMessages = () => {
     },
     EVENT_CREATION: (userName: string) => {
         return `Hello ${userName}, your event has been created, please do not forget to join on the selected date`
+    },
+    REFUND_TRANSACTION_DESCRIPTION: (event_title:string) => {
+        return `Refund from ${event_title} cancellation`
+    },
+    PASSWORD_RESET_OTP: (otp:string) => {
+        return `Your password reset OTP is ${otp}. It expires in 5 minutes.`
+    },
+    PASSWORD_RESET_SUCCESSFUL: () => {
+        return `Your password has been reset successfully.`
     }
   };
 };
 
 export default {
-  EmailAuthMailSubjects,
-  generateAuthMailMessages,
+    MailSubjects,
+  generateMessages,
 };
